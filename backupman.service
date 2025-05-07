@@ -1,0 +1,12 @@
+[Unit]
+Description=Mon Application Go
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/home/app
+ExecStart=/home/root/app/backupman
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,45 @@
+general:
+  app_url: http://localhost:8080
+  backup_cron: "* * * * * *"
+
+api_keys:
+  - apikey1
+
+database:
+  provider: mysql
+  host: 127.0.0.1
+  port: 3306
+  db_name: backupman
+  user: root
+  password: root
+  tls: false
+
+data_sources:
+  - provider: mysql
+    label: MySQL 1
+    host: 127.0.0.1
+    port: 3306
+    db_name: backupman
+    user: root
+    password: root
+    tmp_folder: ./tmp/mysql
+    tls: false
+
+drives:
+  - provider: local
+    label: Local Drive
+    folder: ./tmp/drive
+
+notifiers:
+  mail:
+    smtp_host: smtp.example.com
+    smtp_port: 587
+    smtp_user: user
+    smtp_password: password
+    smtp_crypto: ssl
+    template_url: http://localhost:8080/template
+    destinations:
+      - name: Admin
+        email: admin@yopmail.fr
+      - name: Admin 2
+        email: admin2@yopmail.fr

@@ -1,0 +1,30 @@
+services:
+  mariadb:
+    image: mariadb:10.10.3
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: backupman
+    ports:
+      - 3306:3306
+    volumes:
+      - backupman:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    environment:
+      APP_ENV: dev
+      ADMINER_DESIGN: pepa-linha
+      ADMINER_DEFAULT_SERVER: mariadb
+    ports:
+      - 7000:8080
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  backupman:

@@ -10,6 +10,11 @@ type LocalDriveConfig struct {
 	Label  string
 	Folder string
 }
+type GoogleDriveConfig struct {
+	Label          string
+	Folder         string
+	ServiceAccount string
+}
 
 type DataSourceConfig interface{}
 type MysqlDataSourceConfig struct {

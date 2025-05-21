@@ -36,13 +36,18 @@ type SqlNullableTime struct {
 
 func (nt *SqlNullableTime) Scan(value interface{}) error {
 	if value == nil {
-		nt.Time, nt.Valid = time.Time{}, false
+		nt.Time, nt.Valid = time.Time{}, true
 		return nil
 	}
 
 	switch v := value.(type) {
 	case []byte:
-		t, err := time.Parse("2006-01-02 15:04:05", string(v))
+		value := string(v)
+		if value == "0000-00-00 00:00:00" {
+			nt.Time, nt.Valid = time.Time{}, true
+			return nil
+		}
+		t, err := time.Parse("2006-01-02 15:04:05", value)
 		if err != nil {
 			return err
 		}
@@ -71,7 +76,12 @@ func (nt *SqlNonNullableTime) Scan(value interface{}) error {
 
 	switch v := value.(type) {
 	case []byte:
-		t, err := time.Parse("2006-01-02 15:04:05", string(v))
+		value := string(v)
+		if value == "0000-00-00 00:00:00" {
+			nt.Time, nt.Valid = time.Time{}, false
+			return fmt.Errorf("[SqlNonNullableTime] value is nil")
+		}
+		t, err := time.Parse("2006-01-02 15:04:05", value)
 		if err != nil {
 			return err
 		}

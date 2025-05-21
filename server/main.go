@@ -15,12 +15,14 @@ func main() {
 	flag.StringVar(&configFile, "config", "./config.yml", "Path to the config file")
 	var port int
 	flag.IntVar(&port, "port", 8080, "Port to run the server on")
+	flag.Parse()
 
 	config, err := config.YmlToAppConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	app := core.NewApp(config)
+	app.Mode = core.APP_MODE_WEB
 
 	scheduler, err := SetupScheduler(app)
 	if err != nil {

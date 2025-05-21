@@ -12,7 +12,11 @@ import (
 	"github.com/herytz/backupman/core/notifier/mail"
 )
 
+const APP_MODE_CLI = "cli"
+const APP_MODE_WEB = "web"
+
 type App struct {
+	Mode   string
 	Config struct {
 		AppUrl     string
 		BackupCron string
@@ -40,6 +44,8 @@ func NewApp(config AppConfig) *App {
 		switch config := driveConfig.(type) {
 		case LocalDriveConfig:
 			drives[i] = drive.NewLocalDrive(config.Label, config.Folder)
+		case GoogleDriveConfig:
+			drives[i] = drive.NewGoogleDrive(config.Label, config.Folder, config.ServiceAccount)
 		default:
 			log.Fatal("Unsupported drive type")
 		}

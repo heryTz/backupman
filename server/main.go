@@ -22,6 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 	app := core.NewApp(config)
+	app.Mode = core.APP_MODE_WEB
 
 	scheduler, err := SetupScheduler(app)
 	if err != nil {

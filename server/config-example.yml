@@ -29,6 +29,10 @@ drives:
   - provider: local
     label: Local Drive
     folder: ./tmp/drive
+  - provider: google_drive
+    label: Google Drive
+    folder: demo
+    service_account: ./service-account.json
 
 notifiers:
   mail:

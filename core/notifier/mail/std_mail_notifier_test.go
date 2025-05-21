@@ -10,7 +10,7 @@ import (
 func TestSendMailSuccess(t *testing.T) {
 	mailer := mail.NewStdMailNotifier("localhost", 1025, "", "", "")
 	err := mailer.Send(mail.MailNotifyInput{
-		Recipients: []mail.Recipent{
+		Recipients: []mail.Recipient{
 			{Name: "John Doe", Email: "johndoe3@yopmail.fr"},
 		},
 		Subject: "Test Subject",

@@ -86,13 +86,25 @@ func Backup(app *core.App) ([]string, error) {
 		if err != nil {
 			return backupIds, fmt.Errorf("failed to handle backup (%s) status => %s", backup.Id, err)
 		}
-		go RemoveBackupDump(app, backupWithStatus)
-		go func(app *core.App, id string) {
-			err := notification.NotifyBackupReport(app, id)
+
+		if app.Mode == core.APP_MODE_CLI {
+			err = RemoveBackupDump(app, backupWithStatus)
+			if err != nil {
+				log.Printf("failed to remove dump file (%s) => %s", backupWithStatus.DumpPath, err)
+			}
+			err = notification.NotifyBackupReport(app, backupId)
 			if err != nil {
 				log.Printf("failed to send backup report notification => %s", err)
 			}
-		}(app, backup.Id)
+		} else {
+			go RemoveBackupDump(app, backupWithStatus)
+			go func(app *core.App, id string) {
+				err := notification.NotifyBackupReport(app, id)
+				if err != nil {
+					log.Printf("failed to send backup report notification => %s", err)
+				}
+			}(app, backup.Id)
+		}
 	}
 
 	return backupIds, nil

@@ -56,6 +56,11 @@ type NotifierConfig struct {
 	Mail MailNotifierConfig
 }
 
+type RetentionConfig struct {
+	Enabled bool
+	Days    int
+}
+
 type AppConfig struct {
 	General     GeneralConfig
 	ApiKeys     []string
@@ -63,4 +68,5 @@ type AppConfig struct {
 	DataSources []DataSourceConfig
 	Db          DbConfig
 	Notifiers   NotifierConfig
+	Retention   RetentionConfig
 }

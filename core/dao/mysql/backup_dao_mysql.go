@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/herytz/backupman/core/lib"
@@ -137,7 +138,7 @@ func (dao *BackupDaoMysql) scanFullBackup(rows *sql.Rows) (map[string]*model.Bac
 	return results, nil
 }
 
-func (dao *BackupDaoMysql) ReadBackupFullById(id string) (*model.BackupFull, error) {
+func (dao *BackupDaoMysql) ReadFullById(id string) (*model.BackupFull, error) {
 	rows, err := dao.db.Query("SELECT * FROM backups LEFT JOIN backup_drive_files ON backups.id = backup_drive_files.backup_id WHERE backups.id = ? ORDER BY backups.created_at DESC", id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read backup full by id %s => %v", id, err)
@@ -153,7 +154,7 @@ func (dao *BackupDaoMysql) ReadBackupFullById(id string) (*model.BackupFull, err
 	return results[id], nil
 }
 
-func (dao *BackupDaoMysql) ReadAllBackupFull() ([]model.BackupFull, error) {
+func (dao *BackupDaoMysql) ReadAllFull() ([]model.BackupFull, error) {
 	rows, err := dao.db.Query("SELECT * FROM backups LEFT JOIN backup_drive_files ON backups.id = backup_drive_files.backup_id ORDER BY backups.created_at DESC")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read backup all full => %v", err)
@@ -168,4 +169,29 @@ func (dao *BackupDaoMysql) ReadAllBackupFull() ([]model.BackupFull, error) {
 		backups = append(backups, *backup)
 	}
 	return backups, nil
+}
+
+func (dao *BackupDaoMysql) ReadOlderThan(date time.Time) ([]model.BackupFull, error) {
+	rows, err := dao.db.Query("SELECT * FROM backups LEFT JOIN backup_drive_files ON backups.id = backup_drive_files.backup_id WHERE backups.created_at < ? ORDER BY backups.created_at DESC", date)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read backup older than %s => %v", date, err)
+	}
+	defer rows.Close()
+	results, err := dao.scanFullBackup(rows)
+	if err != nil {
+		return nil, err
+	}
+	backups := make([]model.BackupFull, 0, len(results))
+	for _, backup := range results {
+		backups = append(backups, *backup)
+	}
+	return backups, nil
+}
+
+func (dao *BackupDaoMysql) Delete(id string) error {
+	_, err := dao.db.Exec("DELETE FROM backups WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete backup => %s", err)
+	}
+	return nil
 }

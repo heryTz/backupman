@@ -23,7 +23,7 @@ func connectDb() {
 	}
 }
 
-func TestReadBackupFullById(t *testing.T) {
+func TestReadFullById(t *testing.T) {
 	connectDb()
 	backupDao := mysql.NewBackupDaoMysql(dbConn)
 	driveFileDao := mysql.NewDriveFileDaoMysql(dbConn)
@@ -53,7 +53,7 @@ func TestReadBackupFullById(t *testing.T) {
 	driveFile2, err := driveFileDao.Create(driveFile2Input)
 	assert.NoError(t, err)
 
-	backupFull, err := backupDao.ReadBackupFullById(backup)
+	backupFull, err := backupDao.ReadFullById(backup)
 	assert.NoError(t, err)
 	assert.NotEqual(t, nil, backupFull)
 	assert.Equal(t, backup, backupFull.Id)

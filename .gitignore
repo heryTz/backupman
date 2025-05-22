@@ -1,2 +1,5 @@
 bin
 service-account.json
+tmp
+config.yml
+config.*.yml

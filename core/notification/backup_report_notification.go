@@ -12,7 +12,7 @@ import (
 )
 
 func NotifyBackupReport(app *core.App, backupId string) error {
-	backup, err := app.Db.Backup.ReadBackupFullById(backupId)
+	backup, err := app.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return err
 	}

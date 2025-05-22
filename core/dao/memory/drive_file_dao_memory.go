@@ -47,3 +47,10 @@ func (dao *DriveFileDaoMemory) ReadById(id string) *model.DriveFile {
 func (dao *DriveFileDaoMemory) ReadAll() []*model.DriveFile {
 	return dao.db.DriveFile.ReadAll()
 }
+
+func (dao *DriveFileDaoMemory) Delete(id string) error {
+	if dao.db.DriveFile.ReadById(id) == nil {
+		return fmt.Errorf("could not delete drive file with id %s", id)
+	}
+	return dao.db.DriveFile.Delete(id)
+}

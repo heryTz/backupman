@@ -60,3 +60,11 @@ func (dao *DriveFileDaoMysql) Update(id string, data model.DriveFile) (string, e
 	}
 	return id, nil
 }
+
+func (dao *DriveFileDaoMysql) Delete(id string) error {
+	_, err := dao.db.Exec("DELETE FROM backup_drive_files WHERE id = ?", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete drive file: %v", err)
+	}
+	return nil
+}

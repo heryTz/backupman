@@ -34,6 +34,10 @@ type App struct {
 	Notifiers struct {
 		Mail mail.MailNotifier
 	}
+	Retention struct {
+		Enabled bool
+		Days    int
+	}
 }
 
 func NewApp(config AppConfig) *App {
@@ -119,6 +123,9 @@ func NewApp(config AppConfig) *App {
 	app.ApiKeys = config.ApiKeys
 	app.Config.AppUrl = config.General.AppUrl
 	app.Config.BackupCron = config.General.BackupCron
+
+	app.Retention.Enabled = config.Retention.Enabled
+	app.Retention.Days = config.Retention.Days
 
 	return &app
 }

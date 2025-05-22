@@ -8,6 +8,10 @@ func (d *DriveMock) Upload(srcPath string) (DriveFile, error) {
 	}, nil
 }
 
+func (d *DriveMock) Delete(dstPath string) error {
+	return nil
+}
+
 func (d *DriveMock) GetLabel() string {
 	return "drive_mock"
 }

@@ -15,7 +15,7 @@ func TestBackupReport(t *testing.T) {
 	assert.NoError(t, err)
 	for _, backupId := range backupIds {
 		assert.NotEqual(t, "", backupId)
-		backupFull, err := app.Db.Backup.ReadBackupFullById(backupId)
+		backupFull, err := app.Db.Backup.ReadFullById(backupId)
 		assert.NoError(t, err)
 		assert.NotEqual(t, nil, backupFull)
 		assert.Equal(t, model.BACKUP_STATUS_FINISHED, backupFull.Status)

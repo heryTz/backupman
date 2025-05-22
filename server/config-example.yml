@@ -47,3 +47,8 @@ notifiers:
         email: admin@yopmail.fr
       - name: Admin 2
         email: admin2@yopmail.fr
+
+retention:
+  enabled: true
+  by: age
+  value: 30 #day

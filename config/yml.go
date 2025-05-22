@@ -57,6 +57,11 @@ type config struct {
 			}
 		}
 	}
+	Retention struct {
+		Enabled string
+		By      string
+		Value   int
+	}
 }
 
 func YmlToAppConfig(file string) (core.AppConfig, error) {
@@ -156,6 +161,18 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 			TemplateUrl:  ymlConfig.Notifiers.Mail.TemplateUrl,
 			Destinations: destinations,
 		},
+	}
+
+	if ymlConfig.Retention.Enabled == "true" {
+		switch ymlConfig.Retention.By {
+		case "age":
+			c.Retention = core.RetentionConfig{
+				Enabled: true,
+				Days:    ymlConfig.Retention.Value,
+			}
+		default:
+			return c, fmt.Errorf("unsupported retention type: %s", ymlConfig.Retention.By)
+		}
 	}
 
 	return c, nil

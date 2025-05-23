@@ -107,5 +107,21 @@ func Backup(app *core.App) ([]string, error) {
 		}
 	}
 
+	if app.Retention.Enabled {
+		if app.Mode == core.APP_MODE_CLI {
+			err := RemoveOldBackup(app)
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			go func(app *core.App) {
+				err := RemoveOldBackup(app)
+				if err != nil {
+					log.Println(err)
+				}
+			}(app)
+		}
+	}
+
 	return backupIds, nil
 }

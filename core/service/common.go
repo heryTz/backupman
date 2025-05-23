@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/model"
 )
 
 func HandleBackupStatus(app *core.App, id string) (model.Backup, error) {
-	backup, err := app.Db.Backup.ReadBackupFullById(id)
+	backup, err := app.Db.Backup.ReadFullById(id)
 	if err != nil {
 		return model.Backup{}, fmt.Errorf("failed to read backup full by id (%s): %s", id, err)
 	}
@@ -84,6 +86,44 @@ func RemoveBackupDump(app *core.App, backup model.Backup) error {
 	_, err = app.Db.Backup.Update(backup.Id, backup)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func RemoveOldBackup(app *core.App) error {
+	maxAge := time.Now().AddDate(0, 0, -app.Retention.Days)
+	backups, err := app.Db.Backup.ReadOlderThan(maxAge)
+	if err != nil {
+		return fmt.Errorf("failed to read backups older than %s => %s", maxAge, err)
+	}
+
+	for _, backup := range backups {
+		for _, driveFile := range backup.DriveFiles {
+			var drive drive.Drive
+			for _, d := range app.Drives {
+				if d.GetProvider() == driveFile.Provider {
+					drive = d
+					break
+				}
+			}
+			if drive == nil {
+				return fmt.Errorf("drive not found for provider %s", driveFile.Provider)
+			}
+			err := drive.Delete(driveFile.Path)
+			if err != nil {
+				return fmt.Errorf("failed to delete drive file (%s) => %s", driveFile.Path, err)
+			}
+			err = app.Db.DriveFile.Delete(driveFile.Id)
+			if err != nil {
+				return fmt.Errorf("failed to delete drive file (%s) => %s", driveFile.Id, err)
+			}
+		}
+
+		err := app.Db.Backup.Delete(backup.Id)
+		if err != nil {
+			return fmt.Errorf("failed to delete backup (%s) => %s", backup.Id, err)
+		}
 	}
 
 	return nil

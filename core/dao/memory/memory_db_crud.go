@@ -49,3 +49,11 @@ func (dao *MemoryDbCrud[T]) ReadAll() []T {
 	}
 	return result
 }
+
+func (dao *MemoryDbCrud[T]) Delete(id string) error {
+	if dao.data[id] == nil {
+		return fmt.Errorf("could not delete %s with id %s", dao.table, id)
+	}
+	delete(dao.data, id)
+	return nil
+}

@@ -6,6 +6,7 @@ type DriveFile struct {
 
 type Drive interface {
 	Upload(srcPath string) (DriveFile, error)
+	Delete(srcPath string) error
 	GetLabel() string
 	GetProvider() string
 }

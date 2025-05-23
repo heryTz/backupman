@@ -2,6 +2,7 @@ package memory
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/herytz/backupman/core/model"
 )
@@ -40,7 +41,7 @@ func (dao *BackupDaoMemory) Update(id string, data model.Backup) (string, error)
 	return id, nil
 }
 
-func (dao *BackupDaoMemory) ReadBackupFullById(id string) (*model.BackupFull, error) {
+func (dao *BackupDaoMemory) ReadFullById(id string) (*model.BackupFull, error) {
 	backup := dao.db.Backup.ReadById(id)
 	if backup == nil {
 		return nil, nil
@@ -63,7 +64,7 @@ func (dao *BackupDaoMemory) ReadBackupFullById(id string) (*model.BackupFull, er
 	return backupFull, nil
 }
 
-func (dao *BackupDaoMemory) ReadAllBackupFull() ([]model.BackupFull, error) {
+func (dao *BackupDaoMemory) ReadAllFull() ([]model.BackupFull, error) {
 	backupFullList := make([]model.BackupFull, 0)
 	backupList := dao.db.Backup.ReadAll()
 	driveFiles := dao.db.DriveFile.ReadAll()
@@ -85,4 +86,42 @@ func (dao *BackupDaoMemory) ReadAllBackupFull() ([]model.BackupFull, error) {
 		backupFullList = append(backupFullList, backupFull)
 	}
 	return backupFullList, nil
+}
+
+func (dao *BackupDaoMemory) ReadOlderThan(date time.Time) ([]model.BackupFull, error) {
+	backupFullList := make([]model.BackupFull, 0)
+	backupList := dao.db.Backup.ReadAll()
+	driveFiles := dao.db.DriveFile.ReadAll()
+	for _, backup := range backupList {
+		if backup.CreatedAt.Before(date) {
+			var backupDriveFiles []*model.DriveFile
+			for _, driveFile := range driveFiles {
+				if driveFile.BackupId == backup.Id {
+					backupDriveFiles = append(backupDriveFiles, driveFile)
+				}
+			}
+			backupFull := model.BackupFull{
+				Id:         backup.Id,
+				Status:     backup.Status,
+				Label:      backup.Label,
+				DumpPath:   backup.DumpPath,
+				CreatedAt:  backup.CreatedAt,
+				DriveFiles: backupDriveFiles,
+			}
+			backupFullList = append(backupFullList, backupFull)
+		}
+	}
+	return backupFullList, nil
+}
+
+func (dao *BackupDaoMemory) Delete(id string) error {
+	backup := dao.db.Backup.ReadById(id)
+	if backup == nil {
+		return fmt.Errorf("no backup found with id %s", id)
+	}
+	err := dao.db.Backup.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

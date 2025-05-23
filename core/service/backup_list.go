@@ -15,7 +15,7 @@ func BackupList(app *core.App) (BackupListOutput, error) {
 	data := BackupListOutput{
 		Results: make([]model.BackupFull, 0),
 	}
-	results, err := app.Db.Backup.ReadAllBackupFull()
+	results, err := app.Db.Backup.ReadAllFull()
 	if err != nil {
 		return data, fmt.Errorf("error reading backups => %s", err)
 	}

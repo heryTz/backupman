@@ -25,7 +25,7 @@ func NewLocalDrive(label, folder string) *LocalDrive {
 func (d *LocalDrive) Upload(srcPath string) (DriveFile, error) {
 	srcFile, err := os.Open(srcPath)
 	if err != nil {
-		log.Printf("failed to open file: %s", err)
+		log.Printf("failed to open file => %s", err)
 		return DriveFile{}, err
 	}
 	defer srcFile.Close()
@@ -34,20 +34,34 @@ func (d *LocalDrive) Upload(srcPath string) (DriveFile, error) {
 	dstPath := filepath.Join(d.Folder, dstFilename)
 	dstFile, err := os.Create(dstPath)
 	if err != nil {
-		log.Printf("failed to create file: %s", err)
+		log.Printf("failed to create file => %s", err)
 		return DriveFile{}, err
 	}
 	defer dstFile.Close()
 
 	_, err = srcFile.WriteTo(dstFile)
 	if err != nil {
-		log.Printf("failed to copy file: %s", err)
+		log.Printf("failed to copy file => %s", err)
 		return DriveFile{}, err
 	}
 
 	return DriveFile{
 		Path: dstFile.Name(),
 	}, nil
+}
+
+func (d *LocalDrive) Delete(srcPath string) error {
+	err := os.Remove(srcPath)
+	if err != nil {
+		switch err.(type) {
+		case *os.PathError:
+			log.Printf("file does not exist => %s", err)
+		default:
+			log.Printf("failed to delete file: %s", err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *LocalDrive) GetLabel() string {

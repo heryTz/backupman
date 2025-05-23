@@ -14,3 +14,12 @@ func TestGoogleDriveUploadFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, driveFile.Path)
 }
+
+func TestGoogleDriveDeleteFile(t *testing.T) {
+	serviceAccount := "./service-account.json"
+	googleDrive := drive.NewGoogleDrive("Google Drive", "demo", serviceAccount)
+	driveFile, err := googleDrive.Upload("./tmp/test.txt")
+	assert.NoError(t, err)
+	err = googleDrive.Delete(driveFile.Path)
+	assert.NoError(t, err)
+}

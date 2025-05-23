@@ -36,6 +36,7 @@ drives:
 
 notifiers:
   mail:
+    enabled: true
     smtp_host: smtp.example.com
     smtp_port: 587
     smtp_user: user
@@ -52,3 +53,10 @@ retention:
   enabled: true
   by: age
   value: 30 #day
+
+webhooks:
+  enabled: true
+  endpoints:
+    - name: My Webhook
+      url: http://localhost:8080/webhook
+      token: xxx

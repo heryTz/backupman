@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/herytz/backupman/core"
@@ -45,12 +46,12 @@ type config struct {
 	}
 	Notifiers struct {
 		Mail struct {
+			Enabled      string
 			SmtpHost     string `yaml:"smtp_host"`
 			SmtpPort     int    `yaml:"smtp_port"`
 			SmtpUser     string `yaml:"smtp_user"`
 			SmtpPassword string `yaml:"smtp_password"`
 			SmtpCrypto   string `yaml:"smtp_crypto"`
-			TemplateUrl  string `yaml:"template_url"`
 			Destinations []struct {
 				Name  string
 				Email string
@@ -61,6 +62,14 @@ type config struct {
 		Enabled string
 		By      string
 		Value   int
+	}
+	Webhooks struct {
+		Enabled   string
+		Endpoints []struct {
+			Name  string
+			Url   string
+			Token string
+		}
 	}
 }
 
@@ -153,12 +162,12 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 
 	c.Notifiers = core.NotifierConfig{
 		Mail: core.MailNotifierConfig{
+			Enabled:      ymlConfig.Notifiers.Mail.Enabled == "true",
 			SmtpHost:     ymlConfig.Notifiers.Mail.SmtpHost,
 			SmtpPort:     ymlConfig.Notifiers.Mail.SmtpPort,
 			SmtpUser:     ymlConfig.Notifiers.Mail.SmtpUser,
 			SmtpPassword: ymlConfig.Notifiers.Mail.SmtpPassword,
 			SmtpCrypto:   ymlConfig.Notifiers.Mail.SmtpCrypto,
-			TemplateUrl:  ymlConfig.Notifiers.Mail.TemplateUrl,
 			Destinations: destinations,
 		},
 	}
@@ -172,6 +181,17 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 			}
 		default:
 			return c, fmt.Errorf("unsupported retention type: %s", ymlConfig.Retention.By)
+		}
+	}
+
+	c.Webhooks = []core.WebhookConfig{}
+	if ymlConfig.Webhooks.Enabled == "true" {
+		for _, endpoint := range ymlConfig.Webhooks.Endpoints {
+			c.Webhooks = append(c.Webhooks, core.WebhookConfig{
+				Name:  endpoint.Name,
+				Url:   endpoint.Url,
+				Token: strings.TrimSpace(endpoint.Token),
+			})
 		}
 	}
 

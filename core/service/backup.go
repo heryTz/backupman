@@ -92,16 +92,36 @@ func Backup(app *core.App) ([]string, error) {
 			if err != nil {
 				log.Printf("failed to remove dump file (%s) => %s", backupWithStatus.DumpPath, err)
 			}
-			err = notification.NotifyBackupReport(app, backupId)
-			if err != nil {
-				log.Printf("failed to send backup report notification => %s", err)
-			}
 		} else {
 			go RemoveBackupDump(app, backupWithStatus)
-			go func(app *core.App, id string) {
-				err := notification.NotifyBackupReport(app, id)
+		}
+
+		if app.Notification.Mail.Enabled {
+			if app.Mode == core.APP_MODE_CLI {
+				err = notification.NotifyBackupReport(app, backupId)
 				if err != nil {
 					log.Printf("failed to send backup report notification => %s", err)
+				}
+			} else {
+				go func(app *core.App, id string) {
+					err := notification.NotifyBackupReport(app, id)
+					if err != nil {
+						log.Printf("failed to send backup report notification => %s", err)
+					}
+				}(app, backup.Id)
+			}
+		}
+
+		if app.Mode == core.APP_MODE_CLI {
+			err := notification.BackupReportWebhook(app, backup.Id)
+			if err != nil {
+				log.Printf("failed to send backup finished webhook => %s", err)
+			}
+		} else {
+			go func(app *core.App, id string) {
+				err := notification.BackupReportWebhook(app, id)
+				if err != nil {
+					log.Printf("failed to send backup finished webhook => %s", err)
 				}
 			}(app, backup.Id)
 		}

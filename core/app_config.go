@@ -44,12 +44,12 @@ type MailNotifierDestinationConfig struct {
 	Email string
 }
 type MailNotifierConfig struct {
+	Enabled      bool
 	SmtpHost     string
 	SmtpPort     int
 	SmtpUser     string
 	SmtpPassword string
 	SmtpCrypto   string
-	TemplateUrl  string
 	Destinations []MailNotifierDestinationConfig
 }
 type NotifierConfig struct {
@@ -61,6 +61,12 @@ type RetentionConfig struct {
 	Days    int
 }
 
+type WebhookConfig struct {
+	Name  string
+	Url   string
+	Token string
+}
+
 type AppConfig struct {
 	General     GeneralConfig
 	ApiKeys     []string
@@ -69,4 +75,5 @@ type AppConfig struct {
 	Db          DbConfig
 	Notifiers   NotifierConfig
 	Retention   RetentionConfig
+	Webhooks    []WebhookConfig
 }

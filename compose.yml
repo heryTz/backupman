@@ -6,7 +6,7 @@ services:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: backupman
     ports:
-      - 3306:3306
+      - 3307:3306
     volumes:
       - backupman:/var/lib/mysql
 
@@ -23,8 +23,8 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "1026:1025"
+      - "8026:8025"
 
 volumes:
   backupman:

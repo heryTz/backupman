@@ -15,6 +15,12 @@ import (
 const APP_MODE_CLI = "cli"
 const APP_MODE_WEB = "web"
 
+type Webhook struct {
+	Name  string
+	Url   string
+	Token string
+}
+
 type App struct {
 	Mode   string
 	Config struct {
@@ -27,8 +33,8 @@ type App struct {
 	Db           dao.Dao
 	Notification struct {
 		Mail struct {
+			Enabled      bool
 			Destinations []mail.Recipient
-			TemplateUrl  string
 		}
 	}
 	Notifiers struct {
@@ -38,6 +44,7 @@ type App struct {
 		Enabled bool
 		Days    int
 	}
+	Webhooks []Webhook
 }
 
 func NewApp(config AppConfig) *App {
@@ -99,23 +106,34 @@ func NewApp(config AppConfig) *App {
 	}
 
 	mailConfig := config.Notifiers.Mail
-	app.Notifiers.Mail = mail.NewStdMailNotifier(
-		mailConfig.SmtpHost,
-		mailConfig.SmtpPort,
-		mailConfig.SmtpUser,
-		mailConfig.SmtpPassword,
-		mailConfig.SmtpCrypto,
-	)
-
-	mailDestinations := make([]mail.Recipient, len(mailConfig.Destinations))
-	for i, destination := range mailConfig.Destinations {
-		mailDestinations[i] = mail.Recipient{
-			Name:  destination.Name,
-			Email: destination.Email,
+	if mailConfig.Enabled {
+		app.Notifiers.Mail = mail.NewStdMailNotifier(
+			mailConfig.SmtpHost,
+			mailConfig.SmtpPort,
+			mailConfig.SmtpUser,
+			mailConfig.SmtpPassword,
+			mailConfig.SmtpCrypto,
+		)
+		mailDestinations := []mail.Recipient{}
+		for _, destination := range mailConfig.Destinations {
+			mailDestinations = append(mailDestinations, mail.Recipient{
+				Name:  destination.Name,
+				Email: destination.Email,
+			})
 		}
+
+		app.Notification.Mail.Destinations = mailDestinations
+		app.Notification.Mail.Enabled = mailConfig.Enabled
 	}
-	app.Notification.Mail.TemplateUrl = mailConfig.TemplateUrl
-	app.Notification.Mail.Destinations = mailDestinations
+
+	app.Webhooks = []Webhook{}
+	for _, wh := range config.Webhooks {
+		app.Webhooks = append(app.Webhooks, Webhook{
+			Name:  wh.Name,
+			Url:   wh.Url,
+			Token: wh.Token,
+		})
+	}
 
 	app.Dumpers = dumpers
 	app.Drives = drives

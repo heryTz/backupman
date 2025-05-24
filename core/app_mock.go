@@ -34,9 +34,7 @@ func NewAppMock() *App {
 	// 	DriveFile: mysql.NewDriveFileDaoMysql(dbConn),
 	// }
 
-	app.Config.AppUrl = "http://localhost:8080"
-	app.Config.BackupCron = "0 0 * * *"
-	app.ApiKeys = []string{"123"}
+	app.Mode = APP_MODE_CLI
 	app.Drives = drives
 	app.Dumpers = dumpers
 	app.Db = db

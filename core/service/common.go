@@ -9,6 +9,7 @@ import (
 	"github.com/herytz/backupman/core"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/model"
+	"github.com/herytz/backupman/core/notification"
 )
 
 func HandleBackupStatus(app *core.App, id string) (model.Backup, error) {
@@ -57,12 +58,12 @@ func HandleBackupStatus(app *core.App, id string) (model.Backup, error) {
 		if err != nil {
 			return model.Backup{}, fmt.Errorf("failed to update backup (%s) status to failed: %s", backup.Id, err)
 		}
-	}
-
-	sampleBackup.Status = model.BACKUP_STATUS_FINISHED
-	_, err = app.Db.Backup.Update(backup.Id, sampleBackup)
-	if err != nil {
-		return model.Backup{}, fmt.Errorf("failed to update backup (%s) status to finished: %s", backup.Id, err)
+	} else {
+		sampleBackup.Status = model.BACKUP_STATUS_FINISHED
+		_, err = app.Db.Backup.Update(backup.Id, sampleBackup)
+		if err != nil {
+			return model.Backup{}, fmt.Errorf("failed to update backup (%s) status to finished: %s", backup.Id, err)
+		}
 	}
 
 	return sampleBackup, nil
@@ -124,6 +125,65 @@ func RemoveOldBackup(app *core.App) error {
 		if err != nil {
 			return fmt.Errorf("failed to delete backup (%s) => %s", backup.Id, err)
 		}
+	}
+
+	return nil
+}
+
+func GetDrive(app *core.App, provider string) (drive.Drive, error) {
+	for _, d := range app.Drives {
+		if d.GetProvider() == provider {
+			return d, nil
+		}
+	}
+	return nil, fmt.Errorf("drive not found for provider %s", provider)
+}
+
+func AfterBackup(app *core.App, backupId string) error {
+	backupWithStatus, err := HandleBackupStatus(app, backupId)
+	if err != nil {
+		return fmt.Errorf("failed to handle backup (%s) status => %s", backupId, err)
+	}
+
+	if backupWithStatus.Status == model.BACKUP_STATUS_FINISHED {
+		if app.Mode == core.APP_MODE_CLI {
+			err = RemoveBackupDump(app, backupWithStatus)
+			if err != nil {
+				log.Printf("failed to remove dump file (%s) => %s", backupWithStatus.DumpPath, err)
+			}
+		} else {
+			go RemoveBackupDump(app, backupWithStatus)
+		}
+	}
+
+	if app.Notification.Mail.Enabled {
+		if app.Mode == core.APP_MODE_CLI {
+			err = notification.NotifyBackupReport(app, backupId)
+			if err != nil {
+				log.Printf("failed to send backup report notification => %s", err)
+			}
+		} else {
+			go func(app *core.App, id string) {
+				err := notification.NotifyBackupReport(app, id)
+				if err != nil {
+					log.Printf("failed to send backup report notification => %s", err)
+				}
+			}(app, backupId)
+		}
+	}
+
+	if app.Mode == core.APP_MODE_CLI {
+		err := notification.BackupReportWebhook(app, backupId)
+		if err != nil {
+			log.Printf("failed to send backup finished webhook => %s", err)
+		}
+	} else {
+		go func(app *core.App, id string) {
+			err := notification.BackupReportWebhook(app, id)
+			if err != nil {
+				log.Printf("failed to send backup finished webhook => %s", err)
+			}
+		}(app, backupId)
 	}
 
 	return nil

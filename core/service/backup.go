@@ -6,7 +6,6 @@ import (
 
 	"github.com/herytz/backupman/core"
 	"github.com/herytz/backupman/core/model"
-	"github.com/herytz/backupman/core/notification"
 )
 
 func Backup(app *core.App) ([]string, error) {
@@ -82,48 +81,9 @@ func Backup(app *core.App) ([]string, error) {
 			}
 		}
 
-		backupWithStatus, err := HandleBackupStatus(app, backup.Id)
+		err = AfterBackup(app, backupId)
 		if err != nil {
-			return backupIds, fmt.Errorf("failed to handle backup (%s) status => %s", backup.Id, err)
-		}
-
-		if app.Mode == core.APP_MODE_CLI {
-			err = RemoveBackupDump(app, backupWithStatus)
-			if err != nil {
-				log.Printf("failed to remove dump file (%s) => %s", backupWithStatus.DumpPath, err)
-			}
-		} else {
-			go RemoveBackupDump(app, backupWithStatus)
-		}
-
-		if app.Notification.Mail.Enabled {
-			if app.Mode == core.APP_MODE_CLI {
-				err = notification.NotifyBackupReport(app, backupId)
-				if err != nil {
-					log.Printf("failed to send backup report notification => %s", err)
-				}
-			} else {
-				go func(app *core.App, id string) {
-					err := notification.NotifyBackupReport(app, id)
-					if err != nil {
-						log.Printf("failed to send backup report notification => %s", err)
-					}
-				}(app, backup.Id)
-			}
-		}
-
-		if app.Mode == core.APP_MODE_CLI {
-			err := notification.BackupReportWebhook(app, backup.Id)
-			if err != nil {
-				log.Printf("failed to send backup finished webhook => %s", err)
-			}
-		} else {
-			go func(app *core.App, id string) {
-				err := notification.BackupReportWebhook(app, id)
-				if err != nil {
-					log.Printf("failed to send backup finished webhook => %s", err)
-				}
-			}(app, backup.Id)
+			log.Printf("failed to execute after backup tasks for backup (%s) => %s", backupId, err)
 		}
 	}
 

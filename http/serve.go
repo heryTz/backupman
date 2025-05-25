@@ -1,27 +1,14 @@
-package main
+package http
 
 import (
-	"flag"
 	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/herytz/backupman/config"
 	"github.com/herytz/backupman/core"
 )
 
-func main() {
-	var configFile string
-	flag.StringVar(&configFile, "config", "./config.yml", "Path to the config file")
-	var port int
-	flag.IntVar(&port, "port", 8080, "Port to run the server on")
-	flag.Parse()
-
-	config, err := config.YmlToAppConfig(configFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	app := core.NewApp(config)
+func Serve(app *core.App, port int) error {
 	app.Mode = core.APP_MODE_WEB
 
 	scheduler, err := SetupScheduler(app)
@@ -45,8 +32,5 @@ func main() {
 	apiRouter.GET("/backups/:id/download", DownloadFile(app))
 
 	fmt.Printf("Server is running on port %d\n", port)
-	err = router.Run(fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatal(err)
-	}
+	return router.Run(fmt.Sprintf(":%d", port))
 }

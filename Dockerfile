@@ -1,4 +1,5 @@
-FROM apline:3.22
-COPY backupman /
+FROM alpine:3.22
+WORKDIR /app
+COPY backupman .
 EXPOSE 8080
-ENTRYPOINT ["/backupman"]
+ENTRYPOINT ["/app/backupman"]

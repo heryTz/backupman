@@ -1,0 +1,19 @@
+version: 2
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+      - -buildvcs=false
+    ldflags:
+      - -extldflags '-static'
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commitSHA={{.FullCommit}}
+      - -X main.buildDate={{.Date}}
+
+dockers:
+  - image_templates:
+    - herytz/{{.ProjectName}}:latest 
+    - herytz/{{.ProjectName}}:{{.Tag}} 

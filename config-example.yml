@@ -42,7 +42,6 @@ notifiers:
     smtp_user: user
     smtp_password: password
     smtp_crypto: ssl
-    template_url: http://localhost:8080/template
     destinations:
       - name: Admin
         email: admin@yopmail.fr

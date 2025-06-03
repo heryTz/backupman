@@ -10,11 +10,14 @@ import (
 )
 
 type config struct {
-	General struct {
-		AppUrl     string `yaml:"app_url"`
-		BackupCron string `yaml:"backup_cron"`
+	Http struct {
+		AppUrl    string   `yaml:"app_url"`
+		ApiKeys   []string `yaml:"api_keys"`
+		BackupJob struct {
+			Enabled string `yaml:"enabled"`
+			Cron    string `yaml:"cron"`
+		} `yaml:"backup_job"`
 	}
-	ApiKeys  []string `yaml:"api_keys"`
 	Database struct {
 		Provider string
 		Host     string
@@ -87,12 +90,12 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 		return core.AppConfig{}, fmt.Errorf("failed to parse yml (%s): %s", file, err)
 	}
 
-	c.General = core.GeneralConfig{
-		AppUrl:     ymlConfig.General.AppUrl,
-		BackupCron: ymlConfig.General.BackupCron,
-	}
-
-	c.ApiKeys = ymlConfig.ApiKeys
+	httpConfig := core.HttpConfig{}
+	httpConfig.AppUrl = ymlConfig.Http.AppUrl
+	httpConfig.ApiKeys = ymlConfig.Http.ApiKeys
+	httpConfig.BackupJob.Enabled = ymlConfig.Http.BackupJob.Enabled == "true"
+	httpConfig.BackupJob.Cron = ymlConfig.Http.BackupJob.Cron
+	c.Http = httpConfig
 
 	switch ymlConfig.Database.Provider {
 	case "mysql":

@@ -1,8 +1,12 @@
 package core
 
-type GeneralConfig struct {
-	AppUrl     string
-	BackupCron string
+type HttpConfig struct {
+	AppUrl    string
+	ApiKeys   []string
+	BackupJob struct {
+		Enabled bool
+		Cron    string
+	}
 }
 
 type DriveConfig interface{}
@@ -68,8 +72,7 @@ type WebhookConfig struct {
 }
 
 type AppConfig struct {
-	General     GeneralConfig
-	ApiKeys     []string
+	Http        HttpConfig
 	Drives      []DriveConfig
 	DataSources []DataSourceConfig
 	Db          DbConfig

@@ -22,12 +22,15 @@ type Webhook struct {
 }
 
 type App struct {
-	Mode   string
-	Config struct {
-		AppUrl     string
-		BackupCron string
+	Mode string
+	Http struct {
+		AppUrl    string
+		ApiKeys   []string
+		BackupJob struct {
+			Enabled bool
+			Cron    string
+		}
 	}
-	ApiKeys      []string
 	Drives       []drive.Drive
 	Dumpers      []dumper.Dumper
 	Db           dao.Dao
@@ -138,9 +141,11 @@ func NewApp(config AppConfig) *App {
 	app.Dumpers = dumpers
 	app.Drives = drives
 	app.Db = db
-	app.ApiKeys = config.ApiKeys
-	app.Config.AppUrl = config.General.AppUrl
-	app.Config.BackupCron = config.General.BackupCron
+
+	app.Http.ApiKeys = config.Http.ApiKeys
+	app.Http.AppUrl = config.Http.AppUrl
+	app.Http.BackupJob.Enabled = config.Http.BackupJob.Enabled
+	app.Http.BackupJob.Cron = config.Http.BackupJob.Cron
 
 	app.Retention.Enabled = config.Retention.Enabled
 	app.Retention.Days = config.Retention.Days

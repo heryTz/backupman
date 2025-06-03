@@ -13,7 +13,7 @@ func Auth(app *core.App) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		for _, key := range app.ApiKeys {
+		for _, key := range app.Http.ApiKeys {
 			if apiKey == key {
 				c.Next()
 				return

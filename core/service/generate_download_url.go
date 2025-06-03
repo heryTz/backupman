@@ -21,7 +21,7 @@ func GenerateDownloadUrl(app *core.App, backupId string) (string, error) {
 	downloadUrl := ""
 	for _, driveFile := range backup.DriveFiles {
 		if driveFile.Provider == "local" {
-			downloadUrl, err = url.JoinPath(app.Config.AppUrl, fmt.Sprintf("api/backups/%s/download", driveFile.Id))
+			downloadUrl, err = url.JoinPath(app.Http.AppUrl, fmt.Sprintf("api/backups/%s/download", driveFile.Id))
 			if err != nil {
 				return "", fmt.Errorf("failed to generate download url => %s", err)
 			}

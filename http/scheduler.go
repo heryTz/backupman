@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/go-co-op/gocron/v2"
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/service"
 )
 
-func SetupScheduler(app *core.App) (gocron.Scheduler, error) {
+func SetupScheduler(app *application.App) (gocron.Scheduler, error) {
 	scheduler, err := gocron.NewScheduler()
 	if err != nil {
 		log.Fatalf("failed to create scheduler => %s", err)
@@ -19,7 +19,7 @@ func SetupScheduler(app *core.App) (gocron.Scheduler, error) {
 		job, err := scheduler.NewJob(
 			gocron.CronJob(app.Http.BackupJob.Cron, true),
 			gocron.NewTask(
-				func(app *core.App) {
+				func(app *application.App) {
 					log.Println("running scheduled backup...")
 					backupIds, err := service.Backup(app)
 					if err != nil {

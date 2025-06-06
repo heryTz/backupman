@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/model"
 	"github.com/herytz/backupman/core/notification"
 )
 
-func HandleBackupStatus(app *core.App, id string) (model.Backup, error) {
+func HandleBackupStatus(app *application.App, id string) (model.Backup, error) {
 	backup, err := app.Db.Backup.ReadFullById(id)
 	if err != nil {
 		return model.Backup{}, fmt.Errorf("failed to read backup full by id (%s): %s", id, err)
@@ -69,7 +69,7 @@ func HandleBackupStatus(app *core.App, id string) (model.Backup, error) {
 	return sampleBackup, nil
 }
 
-func RemoveBackupDump(app *core.App, backup model.Backup) error {
+func RemoveBackupDump(app *application.App, backup model.Backup) error {
 	if backup.DumpPath == "" {
 		return nil
 	}
@@ -92,7 +92,7 @@ func RemoveBackupDump(app *core.App, backup model.Backup) error {
 	return nil
 }
 
-func RemoveOldBackup(app *core.App) error {
+func RemoveOldBackup(app *application.App) error {
 	maxAge := time.Now().AddDate(0, 0, -app.Retention.Days)
 	backups, err := app.Db.Backup.ReadOlderThan(maxAge)
 	if err != nil {
@@ -130,7 +130,7 @@ func RemoveOldBackup(app *core.App) error {
 	return nil
 }
 
-func GetDrive(app *core.App, provider string) (drive.Drive, error) {
+func GetDrive(app *application.App, provider string) (drive.Drive, error) {
 	for _, d := range app.Drives {
 		if d.GetProvider() == provider {
 			return d, nil
@@ -139,14 +139,14 @@ func GetDrive(app *core.App, provider string) (drive.Drive, error) {
 	return nil, fmt.Errorf("drive not found for provider %s", provider)
 }
 
-func AfterBackup(app *core.App, backupId string) error {
+func AfterBackup(app *application.App, backupId string) error {
 	backupWithStatus, err := HandleBackupStatus(app, backupId)
 	if err != nil {
 		return fmt.Errorf("failed to handle backup (%s) status => %s", backupId, err)
 	}
 
 	if backupWithStatus.Status == model.BACKUP_STATUS_FINISHED {
-		if app.Mode == core.APP_MODE_CLI {
+		if app.Mode == application.APP_MODE_CLI {
 			err = RemoveBackupDump(app, backupWithStatus)
 			if err != nil {
 				log.Printf("failed to remove dump file (%s) => %s", backupWithStatus.DumpPath, err)
@@ -157,13 +157,13 @@ func AfterBackup(app *core.App, backupId string) error {
 	}
 
 	if app.Notification.Mail.Enabled {
-		if app.Mode == core.APP_MODE_CLI {
+		if app.Mode == application.APP_MODE_CLI {
 			err = notification.NotifyBackupReport(app, backupId)
 			if err != nil {
 				log.Printf("failed to send backup report notification => %s", err)
 			}
 		} else {
-			go func(app *core.App, id string) {
+			go func(app *application.App, id string) {
 				err := notification.NotifyBackupReport(app, id)
 				if err != nil {
 					log.Printf("failed to send backup report notification => %s", err)
@@ -172,13 +172,13 @@ func AfterBackup(app *core.App, backupId string) error {
 		}
 	}
 
-	if app.Mode == core.APP_MODE_CLI {
+	if app.Mode == application.APP_MODE_CLI {
 		err := notification.BackupReportWebhook(app, backupId)
 		if err != nil {
 			log.Printf("failed to send backup finished webhook => %s", err)
 		}
 	} else {
-		go func(app *core.App, id string) {
+		go func(app *application.App, id string) {
 			err := notification.BackupReportWebhook(app, id)
 			if err != nil {
 				log.Printf("failed to send backup finished webhook => %s", err)

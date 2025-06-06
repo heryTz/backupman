@@ -7,10 +7,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 )
 
-func BackupReportWebhook(app *core.App, backupId string) error {
+func BackupReportWebhook(app *application.App, backupId string) error {
 	backup, err := app.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return fmt.Errorf("failed to read backup => %s", err)
@@ -35,7 +35,7 @@ func BackupReportWebhook(app *core.App, backupId string) error {
 	return nil
 }
 
-func send(wh core.Webhook, body []byte) error {
+func send(wh application.Webhook, body []byte) error {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", wh.Url, bytes.NewBuffer(body))

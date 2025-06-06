@@ -5,14 +5,14 @@ import (
 	"path"
 	"testing"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
 	"github.com/herytz/backupman/core/service"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackupRetry(t *testing.T) {
-	app := core.NewAppMock()
+	app := application.NewAppMock()
 	backupIds, err := service.Backup(app)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, backupIds)

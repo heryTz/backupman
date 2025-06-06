@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 )
 
-func GenerateDownloadUrl(app *core.App, backupId string) (string, error) {
+func GenerateDownloadUrl(app *application.App, backupId string) (string, error) {
 	backup, err := app.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return "", err

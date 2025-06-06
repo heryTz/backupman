@@ -3,14 +3,14 @@ package service_test
 import (
 	"testing"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
 	"github.com/herytz/backupman/core/service"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackupReport(t *testing.T) {
-	app := core.NewAppMock()
+	app := application.NewAppMock()
 	backupIds, err := service.Backup(app)
 	assert.NoError(t, err)
 	for _, backupId := range backupIds {

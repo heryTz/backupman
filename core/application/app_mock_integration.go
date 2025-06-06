@@ -1,7 +1,7 @@
 //go:build test_integration
 // +build test_integration
 
-package core
+package application
 
 func init() {
 	unitTest = false

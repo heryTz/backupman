@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var serviceAccount = "../../service-account.json"
+
 func TestGoogleDriveUploadFile(t *testing.T) {
-	serviceAccount := "./service-account.json"
 	googleDrive := drive.NewGoogleDrive("Google Drive", "demo", serviceAccount)
 	driveFile, err := googleDrive.Upload("./tmp/test.txt")
 	assert.NoError(t, err)
@@ -18,7 +19,6 @@ func TestGoogleDriveUploadFile(t *testing.T) {
 }
 
 func TestGoogleDriveDeleteFile(t *testing.T) {
-	serviceAccount := "./service-account.json"
 	googleDrive := drive.NewGoogleDrive("Google Drive", "demo", serviceAccount)
 	driveFile, err := googleDrive.Upload("./tmp/test.txt")
 	assert.NoError(t, err)

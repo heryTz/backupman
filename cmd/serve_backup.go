@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/http"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +27,7 @@ func ServeBackup() *cobra.Command {
 			if err != nil {
 				log.Fatalf("Error creating app from config => %v", err)
 			}
-			app.Mode = core.APP_MODE_WEB
+			app.Mode = application.APP_MODE_WEB
 			err = http.Serve(app, port)
 			if err != nil {
 				log.Fatal(err)

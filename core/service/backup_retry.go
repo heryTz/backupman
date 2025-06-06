@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/model"
 )
 
-func BackupRetry(app *core.App, backupId string) error {
+func BackupRetry(app *application.App, backupId string) error {
 	backup, err := app.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return fmt.Errorf("failed to read backup => %s", err)
@@ -55,7 +55,7 @@ func BackupRetry(app *core.App, backupId string) error {
 	return nil
 }
 
-func upload(app *core.App, dumpPath string, driveFile *model.DriveFile) (drive.DriveFile, error) {
+func upload(app *application.App, dumpPath string, driveFile *model.DriveFile) (drive.DriveFile, error) {
 	var uploadResult drive.DriveFile
 
 	driveFile.Status = model.DRIVE_FILE_STATUS_PENDING

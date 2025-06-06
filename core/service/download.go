@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
 )
 
@@ -14,7 +14,7 @@ type DownloadOutput struct {
 	MimeType string
 }
 
-func Download(app *core.App, driveFileId string) (DownloadOutput, error) {
+func Download(app *application.App, driveFileId string) (DownloadOutput, error) {
 	var output DownloadOutput
 	driveFile, err := app.Db.DriveFile.ReadOrError(driveFileId)
 	if err != nil {

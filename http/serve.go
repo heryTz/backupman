@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 )
 
-func Serve(app *core.App, port int) error {
-	app.Mode = core.APP_MODE_WEB
+func Serve(app *application.App, port int) error {
+	app.Mode = application.APP_MODE_WEB
 
 	scheduler, err := SetupScheduler(app)
 	if err != nil {

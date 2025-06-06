@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 )
 
-func Auth(app *core.App) gin.HandlerFunc {
+func Auth(app *application.App) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		apiKey := c.Request.Header.Get("X-Api-Key")
 		if apiKey == "" {

@@ -6,12 +6,12 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
 	"github.com/herytz/backupman/core/notifier/mail"
 )
 
-func NotifyBackupReport(app *core.App, backupId string) error {
+func NotifyBackupReport(app *application.App, backupId string) error {
 	backup, err := app.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return err

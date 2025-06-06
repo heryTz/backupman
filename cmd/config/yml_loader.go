@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 )
 
 type config struct {
@@ -76,21 +76,21 @@ type config struct {
 	}
 }
 
-func YmlToAppConfig(file string) (core.AppConfig, error) {
-	c := core.AppConfig{}
+func LoadYml(file string) (application.AppConfig, error) {
+	c := application.AppConfig{}
 
 	byte, err := os.ReadFile(file)
 	if err != nil {
-		return core.AppConfig{}, fmt.Errorf("failed to read file (%s): %s", file, err)
+		return application.AppConfig{}, fmt.Errorf("failed to read file (%s): %s", file, err)
 	}
 
 	var ymlConfig config
 	err = yaml.Unmarshal(byte, &ymlConfig)
 	if err != nil {
-		return core.AppConfig{}, fmt.Errorf("failed to parse yml (%s): %s", file, err)
+		return application.AppConfig{}, fmt.Errorf("failed to parse yml (%s): %s", file, err)
 	}
 
-	httpConfig := core.HttpConfig{}
+	httpConfig := application.HttpConfig{}
 	httpConfig.AppUrl = ymlConfig.Http.AppUrl
 	httpConfig.ApiKeys = ymlConfig.Http.ApiKeys
 	httpConfig.BackupJob.Enabled = ymlConfig.Http.BackupJob.Enabled == "true"
@@ -99,7 +99,7 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 
 	switch ymlConfig.Database.Provider {
 	case "mysql":
-		c.Db = core.MysqlDbConfig{
+		c.Db = application.MysqlDbConfig{
 			Host:     ymlConfig.Database.Host,
 			Port:     ymlConfig.Database.Port,
 			User:     ymlConfig.Database.User,
@@ -118,7 +118,7 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 	for _, ds := range ymlConfig.DataSources {
 		switch ds.Provider {
 		case "mysql":
-			c.DataSources = append(c.DataSources, core.MysqlDataSourceConfig{
+			c.DataSources = append(c.DataSources, application.MysqlDataSourceConfig{
 				Host:      ds.Host,
 				Port:      ds.Port,
 				User:      ds.User,
@@ -140,12 +140,12 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 	for _, drive := range ymlConfig.Drives {
 		switch drive.Provider {
 		case "local":
-			c.Drives = append(c.Drives, core.LocalDriveConfig{
+			c.Drives = append(c.Drives, application.LocalDriveConfig{
 				Label:  drive.Label,
 				Folder: drive.Folder,
 			})
 		case "google_drive":
-			c.Drives = append(c.Drives, core.GoogleDriveConfig{
+			c.Drives = append(c.Drives, application.GoogleDriveConfig{
 				Label:          drive.Label,
 				Folder:         drive.Folder,
 				ServiceAccount: drive.ServiceAccount,
@@ -155,16 +155,16 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 		}
 	}
 
-	destinations := []core.MailNotifierDestinationConfig{}
+	destinations := []application.MailNotifierDestinationConfig{}
 	for _, dest := range ymlConfig.Notifiers.Mail.Destinations {
-		destinations = append(destinations, core.MailNotifierDestinationConfig{
+		destinations = append(destinations, application.MailNotifierDestinationConfig{
 			Name:  dest.Name,
 			Email: dest.Email,
 		})
 	}
 
-	c.Notifiers = core.NotifierConfig{
-		Mail: core.MailNotifierConfig{
+	c.Notifiers = application.NotifierConfig{
+		Mail: application.MailNotifierConfig{
 			Enabled:      ymlConfig.Notifiers.Mail.Enabled == "true",
 			SmtpHost:     ymlConfig.Notifiers.Mail.SmtpHost,
 			SmtpPort:     ymlConfig.Notifiers.Mail.SmtpPort,
@@ -178,7 +178,7 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 	if ymlConfig.Retention.Enabled == "true" {
 		switch ymlConfig.Retention.By {
 		case "age":
-			c.Retention = core.RetentionConfig{
+			c.Retention = application.RetentionConfig{
 				Enabled: true,
 				Days:    ymlConfig.Retention.Value,
 			}
@@ -187,10 +187,10 @@ func YmlToAppConfig(file string) (core.AppConfig, error) {
 		}
 	}
 
-	c.Webhooks = []core.WebhookConfig{}
+	c.Webhooks = []application.WebhookConfig{}
 	if ymlConfig.Webhooks.Enabled == "true" {
 		for _, endpoint := range ymlConfig.Webhooks.Endpoints {
-			c.Webhooks = append(c.Webhooks, core.WebhookConfig{
+			c.Webhooks = append(c.Webhooks, application.WebhookConfig{
 				Name:  endpoint.Name,
 				Url:   endpoint.Url,
 				Token: strings.TrimSpace(endpoint.Token),

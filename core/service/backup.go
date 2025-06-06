@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/herytz/backupman/core"
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
 )
 
-func Backup(app *core.App) ([]string, error) {
+func Backup(app *application.App) ([]string, error) {
 	backupIds := make([]string, 0)
 
 	for _, dumper := range app.Dumpers {
@@ -88,13 +88,13 @@ func Backup(app *core.App) ([]string, error) {
 	}
 
 	if app.Retention.Enabled {
-		if app.Mode == core.APP_MODE_CLI {
+		if app.Mode == application.APP_MODE_CLI {
 			err := RemoveOldBackup(app)
 			if err != nil {
 				log.Println(err)
 			}
 		} else {
-			go func(app *core.App) {
+			go func(app *application.App) {
 				err := RemoveOldBackup(app)
 				if err != nil {
 					log.Println(err)

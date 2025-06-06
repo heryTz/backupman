@@ -1,4 +1,4 @@
-package core
+package application
 
 type HttpConfig struct {
 	AppUrl    string

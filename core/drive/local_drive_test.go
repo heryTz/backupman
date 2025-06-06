@@ -1,3 +1,5 @@
+//go:build test_integration
+
 package drive_test
 
 import (

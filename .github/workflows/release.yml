@@ -25,6 +25,12 @@ jobs:
         with:
           go-version: 1.24
 
+      - name: Install dependencies
+        run: go get .
+
+      - name: Test
+        run: go test ./...
+
       - name: Release 
         uses: go-semantic-release/action@v1
         with:

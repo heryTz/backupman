@@ -1,3 +1,5 @@
+//go:build test_integration
+
 package mail_test
 
 import (
@@ -8,7 +10,7 @@ import (
 )
 
 func TestSendMailSuccess(t *testing.T) {
-	mailer := mail.NewStdMailNotifier("localhost", 1025, "", "", "")
+	mailer := mail.NewStdMailNotifier("localhost", 1026, "", "", "")
 	err := mailer.Send(mail.MailNotifyInput{
 		Recipients: []mail.Recipient{
 			{Name: "John Doe", Email: "johndoe3@yopmail.fr"},

@@ -1,3 +1,5 @@
+//go:build test_integration
+
 package mysql_test
 
 import (
@@ -15,7 +17,7 @@ var dbConn *sql.DB
 
 func connectDb() {
 	if dbConn == nil {
-		conn, err := lib.NewConnection("localhost", 3306, "root", "root", "backupman", "false")
+		conn, err := lib.NewConnection("localhost", 3307, "root", "root", "backupman", "false")
 		if err != nil {
 			log.Fatal(err)
 		}

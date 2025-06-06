@@ -1,6 +1,8 @@
 package service_test
 
 import (
+	"os"
+	"path"
 	"testing"
 
 	"github.com/herytz/backupman/core"
@@ -19,7 +21,13 @@ func TestBackupRetry(t *testing.T) {
 	backup, err := app.Db.Backup.ReadOrError(backupId)
 	assert.NoError(t, err)
 	backup.Status = model.BACKUP_STATUS_FAILED
-	backup.DumpPath = "./tmp/backup.sql"
+	dummyFolder := "./tmp"
+	err = os.MkdirAll(dummyFolder, 0755)
+	assert.NoError(t, err, "Failed to create temporary directory for backup")
+	dummyBackup := path.Join(dummyFolder, "dummy_backup.sql")
+	_, err = os.Create(dummyBackup)
+	assert.NoError(t, err, "Failed to create dummy backup file")
+	backup.DumpPath = dummyBackup
 	_, err = app.Db.Backup.Update(backupId, *backup)
 	assert.NoError(t, err)
 

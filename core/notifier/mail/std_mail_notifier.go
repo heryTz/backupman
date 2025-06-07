@@ -108,3 +108,13 @@ func (m *StdMailNotifier) Send(input MailNotifyInput) error {
 	}
 	return nil
 }
+
+func (m *StdMailNotifier) Health() error {
+	return m.Send(MailNotifyInput{
+		Subject: "Health Check",
+		Message: "This is a health check email from the StdMailNotifier.",
+		Recipients: []Recipient{
+			{Name: "Health Check", Email: "healh.check@yopmail.fr"},
+		},
+	})
+}

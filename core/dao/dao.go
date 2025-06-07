@@ -3,6 +3,7 @@ package dao
 import (
 	"time"
 
+	"github.com/herytz/backupman/core/lib"
 	"github.com/herytz/backupman/core/model"
 )
 
@@ -26,4 +27,5 @@ type DriveFileDao interface {
 type Dao struct {
 	Backup    BackupDao
 	DriveFile DriveFileDao
+	Health    lib.HealthChecker
 }

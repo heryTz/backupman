@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunBackup() *cobra.Command {
+func RunBackup(version application.VersionConfig) *cobra.Command {
 	return &cobra.Command{
 		Use:   "run",
 		Short: "Run the backup",
@@ -23,6 +23,7 @@ func RunBackup() *cobra.Command {
 				log.Fatalf("Error creating app from config => %v", err)
 			}
 			app.Mode = application.APP_MODE_CLI
+			app.Version = version
 			backupIds, err := service.Backup(app)
 			if err != nil {
 				log.Fatal(err)

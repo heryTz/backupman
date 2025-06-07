@@ -9,3 +9,7 @@ func (d *DumperMock) Dump() (string, error) {
 func (d *DumperMock) GetLabel() string {
 	return "dumper_mock"
 }
+
+func (d *DumperMock) Health() error {
+	return nil
+}

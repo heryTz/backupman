@@ -22,6 +22,11 @@ type Webhook struct {
 }
 
 type App struct {
+	Version struct {
+		Version   string
+		CommitSHA string
+		BuildDate string
+	}
 	Mode string
 	Http struct {
 		AppUrl    string
@@ -52,6 +57,10 @@ type App struct {
 
 func NewApp(config AppConfig) *App {
 	app := App{}
+
+	app.Version.Version = config.Version.Version
+	app.Version.CommitSHA = config.Version.CommitSHA
+	app.Version.BuildDate = config.Version.BuildDate
 
 	drives := make([]drive.Drive, len(config.Drives))
 	for i, driveConfig := range config.Drives {
@@ -100,10 +109,12 @@ func NewApp(config AppConfig) *App {
 		}
 		db.Backup = mysql.NewBackupDaoMysql(dbConn)
 		db.DriveFile = mysql.NewDriveFileDaoMysql(dbConn)
+		db.Health = lib.NewHealthMysql(dbConn)
 	case MemoryDbConfig:
 		memoryDb := memory.NewMemoryDb()
 		db.Backup = memory.NewBackupDaoMemory(memoryDb)
 		db.DriveFile = memory.NewDriveFileDaoMemory(memoryDb)
+		db.Health = lib.MockUpHelthChecker{}
 	default:
 		log.Fatal("Unsupported dao type")
 	}

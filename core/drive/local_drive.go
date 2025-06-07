@@ -64,6 +64,32 @@ func (d *LocalDrive) Delete(srcPath string) error {
 	return nil
 }
 
+func (d *LocalDrive) Health() error {
+	folder := "./tmp"
+	err := os.MkdirAll(folder, 0755)
+	if err != nil {
+		return fmt.Errorf("Failed to create temporary directory for healh test => %s", err)
+	}
+	healthTest := filepath.Join(folder, "health_test.txt")
+	os.Remove(healthTest)
+	err = os.WriteFile(healthTest, []byte("health test"), 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create health test file => %s", err)
+	}
+
+	_, err = d.Upload(healthTest)
+	if err != nil {
+		return fmt.Errorf("failed to upload health test file => %s", err)
+	}
+
+	err = d.Delete(healthTest)
+	if err != nil {
+		return fmt.Errorf("failed to delete health test file => %s", err)
+	}
+
+	return nil
+}
+
 func (d *LocalDrive) GetLabel() string {
 	return d.Label
 }

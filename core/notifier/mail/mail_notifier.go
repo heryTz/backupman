@@ -13,4 +13,5 @@ type MailNotifyInput struct {
 
 type MailNotifier interface {
 	Send(input MailNotifyInput) error
+	Health() error
 }

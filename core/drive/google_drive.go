@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -100,6 +101,32 @@ func (d *GoogleDrive) Delete(srcPath string) error {
 		if err != nil {
 			return fmt.Errorf("[Google Drive] Unable to delete file %s => %s", srcPath, err)
 		}
+	}
+
+	return nil
+}
+
+func (d *GoogleDrive) Health() error {
+	folder := "./tmp"
+	err := os.MkdirAll(folder, 0755)
+	if err != nil {
+		return fmt.Errorf("Failed to create temporary directory for healh test => %s", err)
+	}
+	healthTest := path.Join(folder, "health_test.txt")
+	os.Remove(healthTest)
+	err = os.WriteFile(healthTest, []byte("health test"), 0755)
+	if err != nil {
+		return fmt.Errorf("Failed to create health test file => %s", err)
+	}
+
+	file, err := d.Upload(healthTest)
+	if err != nil {
+		return fmt.Errorf("Failed to upload health test file to Google Drive => %s", err)
+	}
+
+	err = d.Delete(file.Path)
+	if err != nil {
+		return fmt.Errorf("Failed to delete health test file from Google Drive => %s", err)
 	}
 
 	return nil

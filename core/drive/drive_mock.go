@@ -12,6 +12,10 @@ func (d *DriveMock) Delete(dstPath string) error {
 	return nil
 }
 
+func (d *DriveMock) Health() error {
+	return nil
+}
+
 func (d *DriveMock) GetLabel() string {
 	return "drive_mock"
 }

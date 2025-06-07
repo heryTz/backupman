@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ServeBackup() *cobra.Command {
+func ServeBackup(version application.VersionConfig) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Serve the backup manager",
@@ -28,6 +28,7 @@ func ServeBackup() *cobra.Command {
 				log.Fatalf("Error creating app from config => %v", err)
 			}
 			app.Mode = application.APP_MODE_WEB
+			app.Version = version
 			err = http.Serve(app, port)
 			if err != nil {
 				log.Fatal(err)

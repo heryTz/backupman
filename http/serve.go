@@ -24,6 +24,7 @@ func Serve(app *application.App, port int) error {
 			"message": "pong",
 		})
 	})
+	router.GET("/health", Health(app))
 
 	apiRouter := router.Group("/api", Auth(app))
 	apiRouter.GET("/backups", ListBackup(app))

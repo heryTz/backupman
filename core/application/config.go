@@ -71,6 +71,12 @@ type WebhookConfig struct {
 	Token string
 }
 
+type VersionConfig struct {
+	Version   string
+	CommitSHA string
+	BuildDate string
+}
+
 type AppConfig struct {
 	Http        HttpConfig
 	Drives      []DriveConfig
@@ -79,4 +85,5 @@ type AppConfig struct {
 	Notifiers   NotifierConfig
 	Retention   RetentionConfig
 	Webhooks    []WebhookConfig
+	Version     VersionConfig
 }

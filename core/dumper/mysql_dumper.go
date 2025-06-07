@@ -290,6 +290,10 @@ func (m *MysqlDumper) createTableValues(name string) (string, error) {
 	return strings.Join(values, ","), rows.Err()
 }
 
+func (m *MysqlDumper) Health() error {
+	return lib.NewHealthMysql(m.db).Check()
+}
+
 func (m *MysqlDumper) GetLabel() string {
 	return m.Label
 }

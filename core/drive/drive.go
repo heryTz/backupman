@@ -9,4 +9,5 @@ type Drive interface {
 	Delete(srcPath string) error
 	GetLabel() string
 	GetProvider() string
+	Health() error
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/herytz/backupman/cmd"
+	"github.com/herytz/backupman/core/application"
 	"github.com/spf13/cobra"
 )
 
@@ -25,14 +26,17 @@ func main() {
 
 	rootCmd.PersistentFlags().StringP("config", "c", "./config.yml", "Path to the config file")
 
-	rootCmd.AddCommand(cmd.RunBackup())
-	rootCmd.AddCommand(cmd.RetryBackup())
-	rootCmd.AddCommand(cmd.ServeBackup())
-	rootCmd.AddCommand(cmd.Version(cmd.VersionParams{
+	versionConfig := application.VersionConfig{
 		Version:   version,
 		CommitSHA: commitSHA,
 		BuildDate: buildDate,
-	}))
+	}
+
+	rootCmd.AddCommand(cmd.RunBackup(versionConfig))
+	rootCmd.AddCommand(cmd.RetryBackup(versionConfig))
+	rootCmd.AddCommand(cmd.ServeBackup(versionConfig))
+	rootCmd.AddCommand(cmd.Version(versionConfig))
+	rootCmd.AddCommand(cmd.Health(versionConfig))
 
 	err := rootCmd.Execute()
 	if err != nil {

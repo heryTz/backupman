@@ -59,3 +59,14 @@ func DownloadFile(app *application.App) gin.HandlerFunc {
 		c.Data(200, output.MimeType, output.Byte)
 	}
 }
+
+func Health(app *application.App) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		health, err := service.Health(app)
+		if err != nil {
+			c.JSON(500, gin.H{"Error": err.Error()})
+			return
+		}
+		c.JSON(200, health)
+	}
+}

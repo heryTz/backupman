@@ -22,10 +22,6 @@ func NewConnection(host string, port int, user string, password string, database
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to MySQL: %w", err)
 	}
-	err = dbConn.Ping()
-	if err != nil {
-		return nil, fmt.Errorf("failed to ping MySQL: %w", err)
-	}
 	return dbConn, nil
 }
 

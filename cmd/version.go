@@ -3,16 +3,11 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/herytz/backupman/core/application"
 	"github.com/spf13/cobra"
 )
 
-type VersionParams struct {
-	Version   string
-	CommitSHA string
-	BuildDate string
-}
-
-func Version(params VersionParams) *cobra.Command {
+func Version(params application.VersionConfig) *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Version information",

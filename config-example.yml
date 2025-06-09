@@ -57,6 +57,7 @@ http:
   app_url: http://localhost:8080
   api_keys:
     - apikey1
+  # Warning: The cron automation is currently part of the HTTP server. In the future, this will be a standalone feature.
   backup_job:
     enabled: true
     cron: "* * * * * *"

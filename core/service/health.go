@@ -40,14 +40,16 @@ func Health(app *application.App) (HealthReport, error) {
 		Status: databaseStatus,
 	}
 
-	mailStatus := lib.HEALTH_UP
-	err = app.Notifiers.Mail.Health()
-	if err != nil {
-		log.Printf("Mail health check failed => %s", err)
-		mailStatus = lib.HEALTH_DOWN
-	}
-	details["Mail"] = ComponentStatus{
-		Status: mailStatus,
+	if app.Notifiers.Mail != nil {
+		mailStatus := lib.HEALTH_UP
+		err = app.Notifiers.Mail.Health()
+		if err != nil {
+			log.Printf("Mail health check failed => %s", err)
+			mailStatus = lib.HEALTH_DOWN
+		}
+		details["Mail"] = ComponentStatus{
+			Status: mailStatus,
+		}
 	}
 
 	driveComponents := make(map[string]ComponentStatus)

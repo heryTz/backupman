@@ -9,7 +9,6 @@ import (
 	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/model"
-	"github.com/herytz/backupman/core/notification"
 )
 
 func HandleBackupStatus(app *application.App, id string) (model.Backup, error) {
@@ -156,34 +155,21 @@ func AfterBackup(app *application.App, backupId string) error {
 		}
 	}
 
-	if app.Notification.Mail.Enabled {
+	for _, notifier := range app.Notifiers {
 		if app.Mode == application.APP_MODE_CLI {
-			err = notification.NotifyBackupReport(app, backupId)
+			err := notifier.BackupReport(backupId)
 			if err != nil {
 				log.Printf("failed to send backup report notification => %s", err)
 			}
 		} else {
-			go func(app *application.App, id string) {
-				err := notification.NotifyBackupReport(app, id)
+			go func(id string) {
+				err := notifier.BackupReport(id)
 				if err != nil {
 					log.Printf("failed to send backup report notification => %s", err)
 				}
-			}(app, backupId)
-		}
-	}
+			}(backupId)
 
-	if app.Mode == application.APP_MODE_CLI {
-		err := notification.BackupReportWebhook(app, backupId)
-		if err != nil {
-			log.Printf("failed to send backup finished webhook => %s", err)
 		}
-	} else {
-		go func(app *application.App, id string) {
-			err := notification.BackupReportWebhook(app, id)
-			if err != nil {
-				log.Printf("failed to send backup finished webhook => %s", err)
-			}
-		}(app, backupId)
 	}
 
 	return nil

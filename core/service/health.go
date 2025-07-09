@@ -40,15 +40,24 @@ func Health(app *application.App) (HealthReport, error) {
 		Status: databaseStatus,
 	}
 
-	if app.Notifiers.Mail != nil {
-		mailStatus := lib.HEALTH_UP
-		err = app.Notifiers.Mail.Health()
-		if err != nil {
-			log.Printf("Mail health check failed => %s", err)
-			mailStatus = lib.HEALTH_DOWN
+	if len(app.Notifiers) > 0 {
+		notifierComponents := make(map[string]ComponentStatus)
+		notifierStatus := lib.HEALTH_UP
+		for _, notifier := range app.Notifiers {
+			status := lib.HEALTH_UP
+			err = notifier.Health()
+			if err != nil {
+				log.Printf("%s health check failed => %s", notifier.GetName(), err)
+				notifierStatus = lib.HEALTH_DOWN
+				status = lib.HEALTH_DOWN
+			}
+			notifierComponents[notifier.GetName()] = ComponentStatus{
+				Status: status,
+			}
 		}
-		details["Mail"] = ComponentStatus{
-			Status: mailStatus,
+		details["Notifiers"] = ComponentStatus{
+			Status:     notifierStatus,
+			Components: notifierComponents,
 		}
 	}
 

@@ -9,7 +9,8 @@ import (
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/dumper"
 	"github.com/herytz/backupman/core/lib"
-	"github.com/herytz/backupman/core/notifier/mail"
+	"github.com/herytz/backupman/core/mailer"
+	"github.com/herytz/backupman/core/notifier"
 )
 
 var unitTest = true
@@ -20,7 +21,7 @@ func NewAppMock() *App {
 	var drives []drive.Drive
 	var dumpers []dumper.Dumper
 	var db dao.Dao
-	var mailNotifier mail.MailNotifier
+	var notifiers []notifier.Notifier
 
 	if unitTest {
 		drives = append(drives, &drive.DriveMock{})
@@ -31,7 +32,7 @@ func NewAppMock() *App {
 			DriveFile: memory.NewDriveFileDaoMemory(memoryDb),
 			Health:    lib.MockUpHelthChecker{},
 		}
-		mailNotifier = mail.NewMockMailNotifier()
+		notifiers = append(notifiers, &notifier.MockNotifier{})
 	} else {
 		drives = append(
 			drives,
@@ -57,20 +58,23 @@ func NewAppMock() *App {
 			DriveFile: mysql.NewDriveFileDaoMysql(dbConn),
 			Health:    lib.NewHealthMysql(dbConn),
 		}
-		mailNotifier = mail.NewStdMailNotifier(
+		mailerTransport := mailer.NewStdMailer(
 			"localhost",
 			1026,
 			"",
 			"",
 			"",
 		)
+		destinations := []mailer.Recipient{}
+		destinations = append(destinations, mailer.Recipient{Name: "John Doe", Email: "john.doe@yopmail.com"})
+		notifiers = append(notifiers, notifier.NewMailNotifier(mailerTransport, db, destinations))
 	}
 
 	app.Mode = APP_MODE_CLI
 	app.Drives = drives
 	app.Dumpers = dumpers
 	app.Db = db
-	app.Notifiers.Mail = mailNotifier
+	app.Notifiers = notifiers
 
 	return &app
 }

@@ -40,18 +40,17 @@ notifiers:
         email: admin@yopmail.fr
       - name: Admin 2
         email: admin2@yopmail.fr
+  webhooks:
+    enabled: true
+    endpoints:
+      - name: My Webhook
+        url: http://localhost:8080/webhook
+        token: xxx
 
 retention:
   enabled: true
   by: age
   value: 30 #day
-
-webhooks:
-  enabled: true
-  endpoints:
-    - name: My Webhook
-      url: http://localhost:8080/webhook
-      token: xxx
 
 http:
   app_url: http://localhost:8080

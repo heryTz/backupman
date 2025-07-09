@@ -1,4 +1,4 @@
-package notification
+package notifier
 
 import (
 	"bytes"
@@ -7,16 +7,31 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/herytz/backupman/core/application"
+	"github.com/herytz/backupman/core/dao"
 )
 
-func BackupReportWebhook(app *application.App, backupId string) error {
-	backup, err := app.Db.Backup.ReadFullById(backupId)
+type WebhookNotifierConfig struct {
+	Name  string
+	Url   string
+	Token string
+}
+
+type WebhookNotifier struct {
+	Db       dao.Dao
+	Webhooks []WebhookNotifierConfig
+}
+
+func NewWebhookNotifier(webhooks []WebhookNotifierConfig, db dao.Dao) *WebhookNotifier {
+	return &WebhookNotifier{Webhooks: webhooks, Db: db}
+}
+
+func (m *WebhookNotifier) BackupReport(backupId string) error {
+	backup, err := m.Db.Backup.ReadFullById(backupId)
 	if err != nil {
 		return fmt.Errorf("failed to read backup => %s", err)
 	}
 
-	for _, wh := range app.Webhooks {
+	for _, wh := range m.Webhooks {
 		body := map[string]interface{}{
 			"Event":   "backup_report",
 			"Payload": backup,
@@ -35,7 +50,7 @@ func BackupReportWebhook(app *application.App, backupId string) error {
 	return nil
 }
 
-func send(wh application.Webhook, body []byte) error {
+func send(wh WebhookNotifierConfig, body []byte) error {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", wh.Url, bytes.NewBuffer(body))
@@ -56,4 +71,12 @@ func send(wh application.Webhook, body []byte) error {
 	}
 
 	return nil
+}
+
+func (m *WebhookNotifier) Health() error {
+	return nil
+}
+
+func (m *WebhookNotifier) GetName() string {
+	return "Webhook"
 }

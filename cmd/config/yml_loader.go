@@ -60,19 +60,19 @@ type config struct {
 				Email string
 			}
 		}
+		Webhooks struct {
+			Enabled   string
+			Endpoints []struct {
+				Name  string
+				Url   string
+				Token string
+			}
+		}
 	}
 	Retention struct {
 		Enabled string
 		By      string
 		Value   int
-	}
-	Webhooks struct {
-		Enabled   string
-		Endpoints []struct {
-			Name  string
-			Url   string
-			Token string
-		}
 	}
 }
 
@@ -163,7 +163,19 @@ func LoadYml(file string) (application.AppConfig, error) {
 		})
 	}
 
+	webhooks := []application.WebhookNotifierConfig{}
+	if ymlConfig.Notifiers.Webhooks.Enabled == "true" {
+		for _, endpoint := range ymlConfig.Notifiers.Webhooks.Endpoints {
+			webhooks = append(webhooks, application.WebhookNotifierConfig{
+				Name:  endpoint.Name,
+				Url:   endpoint.Url,
+				Token: strings.TrimSpace(endpoint.Token),
+			})
+		}
+	}
+
 	c.Notifiers = application.NotifierConfig{
+		Webhooks: webhooks,
 		Mail: application.MailNotifierConfig{
 			Enabled:      ymlConfig.Notifiers.Mail.Enabled == "true",
 			SmtpHost:     ymlConfig.Notifiers.Mail.SmtpHost,
@@ -184,17 +196,6 @@ func LoadYml(file string) (application.AppConfig, error) {
 			}
 		default:
 			return c, fmt.Errorf("unsupported retention type: %s", ymlConfig.Retention.By)
-		}
-	}
-
-	c.Webhooks = []application.WebhookConfig{}
-	if ymlConfig.Webhooks.Enabled == "true" {
-		for _, endpoint := range ymlConfig.Webhooks.Endpoints {
-			c.Webhooks = append(c.Webhooks, application.WebhookConfig{
-				Name:  endpoint.Name,
-				Url:   endpoint.Url,
-				Token: strings.TrimSpace(endpoint.Token),
-			})
 		}
 	}
 

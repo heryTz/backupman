@@ -1,4 +1,4 @@
-package notification
+package message
 
 import (
 	"bytes"
@@ -6,29 +6,8 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/model"
-	"github.com/herytz/backupman/core/notifier/mail"
 )
-
-func NotifyBackupReport(app *application.App, backupId string) error {
-	backup, err := app.Db.Backup.ReadFullById(backupId)
-	if err != nil {
-		return err
-	}
-
-	message, err := buildMessage(backup)
-	if err != nil {
-		return err
-	}
-
-	var input mail.MailNotifyInput
-	input.Recipients = app.Notification.Mail.Destinations
-	input.Subject = "Backup Report"
-	input.Message = message
-
-	return app.Notifiers.Mail.Send(input)
-}
 
 const tmpl = `
 <!DOCTYPE html>
@@ -142,7 +121,7 @@ type EmailData struct {
 	UploadStatus []UploadStatus
 }
 
-func buildMessage(backup *model.BackupFull) (string, error) {
+func BackupReportMail(backup *model.BackupFull) (string, error) {
 	tm, err := template.
 		New("backup_report").
 		Funcs(template.FuncMap{"ToLower": strings.ToLower}).

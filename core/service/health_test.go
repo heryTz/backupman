@@ -18,7 +18,9 @@ func TestHealthSuccess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, lib.HEALTH_UP, report.Status)
 	assert.Equal(t, lib.HEALTH_UP, report.Details["Database"].Status)
-	assert.Equal(t, lib.HEALTH_UP, report.Details["Mail"].Status)
+	for _, v := range app.Notifiers {
+		assert.Equal(t, lib.HEALTH_UP, report.Details["Notifiers"].Components[v.GetName()].Status)
+	}
 	for _, v := range app.Drives {
 		assert.Equal(t, lib.HEALTH_UP, report.Details["Drives"].Components[v.GetLabel()].Status)
 	}

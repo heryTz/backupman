@@ -9,7 +9,8 @@ import (
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/dumper"
 	"github.com/herytz/backupman/core/lib"
-	"github.com/herytz/backupman/core/notifier/mail"
+	"github.com/herytz/backupman/core/mailer"
+	"github.com/herytz/backupman/core/notifier"
 )
 
 const APP_MODE_CLI = "cli"
@@ -36,18 +37,10 @@ type App struct {
 			Cron    string
 		}
 	}
-	Drives       []drive.Drive
-	Dumpers      []dumper.Dumper
-	Db           dao.Dao
-	Notification struct {
-		Mail struct {
-			Enabled      bool
-			Destinations []mail.Recipient
-		}
-	}
-	Notifiers struct {
-		Mail mail.MailNotifier
-	}
+	Drives    []drive.Drive
+	Dumpers   []dumper.Dumper
+	Db        dao.Dao
+	Notifiers []notifier.Notifier
 	Retention struct {
 		Enabled bool
 		Days    int
@@ -119,39 +112,44 @@ func NewApp(config AppConfig) *App {
 		log.Fatal("Unsupported dao type")
 	}
 
+	notifiers := []notifier.Notifier{}
+
 	mailConfig := config.Notifiers.Mail
 	if mailConfig.Enabled {
-		app.Notifiers.Mail = mail.NewStdMailNotifier(
+		mailerTransport := mailer.NewStdMailer(
 			mailConfig.SmtpHost,
 			mailConfig.SmtpPort,
 			mailConfig.SmtpUser,
 			mailConfig.SmtpPassword,
 			mailConfig.SmtpCrypto,
 		)
-		mailDestinations := []mail.Recipient{}
+		mailDestinations := []mailer.Recipient{}
 		for _, destination := range mailConfig.Destinations {
-			mailDestinations = append(mailDestinations, mail.Recipient{
+			mailDestinations = append(mailDestinations, mailer.Recipient{
 				Name:  destination.Name,
 				Email: destination.Email,
 			})
 		}
-
-		app.Notification.Mail.Destinations = mailDestinations
-		app.Notification.Mail.Enabled = mailConfig.Enabled
+		notifiers = append(notifiers, notifier.NewMailNotifier(mailerTransport, db, mailDestinations))
 	}
 
-	app.Webhooks = []Webhook{}
-	for _, wh := range config.Webhooks {
-		app.Webhooks = append(app.Webhooks, Webhook{
-			Name:  wh.Name,
-			Url:   wh.Url,
-			Token: wh.Token,
-		})
+	webhookConfig := config.Notifiers.Webhooks
+	if len(webhookConfig) > 0 {
+		webhookNotifierConfigs := []notifier.WebhookNotifierConfig{}
+		for _, config := range webhookConfig {
+			webhookNotifierConfigs = append(webhookNotifierConfigs, notifier.WebhookNotifierConfig{
+				Name:  config.Name,
+				Url:   config.Name,
+				Token: config.Token,
+			})
+		}
+		notifiers = append(notifiers, notifier.NewWebhookNotifier(webhookNotifierConfigs, db))
 	}
 
 	app.Dumpers = dumpers
 	app.Drives = drives
 	app.Db = db
+	app.Notifiers = notifiers
 
 	app.Http.ApiKeys = config.Http.ApiKeys
 	app.Http.AppUrl = config.Http.AppUrl

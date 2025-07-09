@@ -1,4 +1,4 @@
-package mail
+package mailer
 
 import (
 	"crypto/tls"
@@ -14,7 +14,7 @@ import (
 // -- At the beginning of the connection, using SMTPS over TLS or SMTPS over SSL (port 465)
 // -- After the connection is established, using STARTTLS to upgrade the connection to TLS (port 587)
 
-type StdMailNotifier struct {
+type StdMailer struct {
 	smtpHost   string
 	smtpPort   int
 	smtpUser   string
@@ -22,8 +22,8 @@ type StdMailNotifier struct {
 	smtpCrypto string
 }
 
-func NewStdMailNotifier(smtpHost string, smtpPort int, smtpUser, smtpPass, smtpCrypto string) *StdMailNotifier {
-	return &StdMailNotifier{
+func NewStdMailer(smtpHost string, smtpPort int, smtpUser, smtpPass, smtpCrypto string) *StdMailer {
+	return &StdMailer{
 		smtpHost:   smtpHost,
 		smtpPort:   smtpPort,
 		smtpUser:   smtpUser,
@@ -32,7 +32,7 @@ func NewStdMailNotifier(smtpHost string, smtpPort int, smtpUser, smtpPass, smtpC
 	}
 }
 
-func (m *StdMailNotifier) Send(input MailNotifyInput) error {
+func (m *StdMailer) Send(input MailerInput) error {
 	var err error
 	var client *smtp.Client
 
@@ -109,10 +109,10 @@ func (m *StdMailNotifier) Send(input MailNotifyInput) error {
 	return nil
 }
 
-func (m *StdMailNotifier) Health() error {
-	return m.Send(MailNotifyInput{
+func (m *StdMailer) Health() error {
+	return m.Send(MailerInput{
 		Subject: "Health Check",
-		Message: "This is a health check email from the StdMailNotifier.",
+		Message: "This is a health check email from the StdMailer.",
 		Recipients: []Recipient{
 			{Name: "Health Check", Email: "healh.check@yopmail.fr"},
 		},

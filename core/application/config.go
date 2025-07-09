@@ -47,6 +47,7 @@ type MailNotifierDestinationConfig struct {
 	Name  string
 	Email string
 }
+
 type MailNotifierConfig struct {
 	Enabled      bool
 	SmtpHost     string
@@ -56,19 +57,21 @@ type MailNotifierConfig struct {
 	SmtpCrypto   string
 	Destinations []MailNotifierDestinationConfig
 }
+
+type WebhookNotifierConfig struct {
+	Name  string
+	Url   string
+	Token string
+}
+
 type NotifierConfig struct {
-	Mail MailNotifierConfig
+	Mail     MailNotifierConfig
+	Webhooks []WebhookNotifierConfig
 }
 
 type RetentionConfig struct {
 	Enabled bool
 	Days    int
-}
-
-type WebhookConfig struct {
-	Name  string
-	Url   string
-	Token string
 }
 
 type VersionConfig struct {
@@ -84,6 +87,5 @@ type AppConfig struct {
 	Db          DbConfig
 	Notifiers   NotifierConfig
 	Retention   RetentionConfig
-	Webhooks    []WebhookConfig
 	Version     VersionConfig
 }

@@ -1,5 +1,6 @@
 {
   "buildFlags": [
     "-tags=test_integration"
-  ]
+  ],
+  "staticcheck": false
 }

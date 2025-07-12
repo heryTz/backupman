@@ -45,7 +45,6 @@ type App struct {
 		Enabled bool
 		Days    int
 	}
-	Webhooks []Webhook
 }
 
 func NewApp(config AppConfig) *App {

@@ -12,6 +12,7 @@ import (
 	"github.com/herytz/backupman/core/lib"
 	"github.com/herytz/backupman/core/mailer"
 	"github.com/herytz/backupman/core/notifier"
+	"github.com/herytz/backupman/migration"
 )
 
 var unitTest = true
@@ -50,6 +51,17 @@ func NewAppMock() *application.App {
 			"backupman",
 			"false",
 		))
+		err := migration.Run(application.MysqlDbConfig{
+			Host:     "localhost",
+			Port:     3307,
+			User:     "root",
+			Password: "root",
+			Database: "backupman",
+			Tls:      "false",
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
 		dbConn, err := lib.NewConnection("localhost", 3307, "root", "root", "backupman", "false")
 		if err != nil {
 			log.Fatal(err)

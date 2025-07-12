@@ -7,9 +7,11 @@ import (
 	"log"
 	"testing"
 
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/dao/mysql"
 	"github.com/herytz/backupman/core/lib"
 	"github.com/herytz/backupman/core/model"
+	"github.com/herytz/backupman/migration"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,6 +24,18 @@ func connectDb() {
 			log.Fatal(err)
 		}
 		dbConn = conn
+	}
+
+	err := migration.Run(application.MysqlDbConfig{
+		Host:     "localhost",
+		Port:     3307,
+		User:     "root",
+		Password: "root",
+		Database: "backupman",
+		Tls:      "false",
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 

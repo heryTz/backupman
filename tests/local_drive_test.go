@@ -1,6 +1,6 @@
 //go:build test_integration
 
-package drive_test
+package tests_test
 
 import (
 	"testing"

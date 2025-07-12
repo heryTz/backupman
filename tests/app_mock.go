@@ -1,8 +1,9 @@
-package application
+package tests
 
 import (
 	"log"
 
+	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/dao"
 	"github.com/herytz/backupman/core/dao/memory"
 	"github.com/herytz/backupman/core/dao/mysql"
@@ -15,8 +16,8 @@ import (
 
 var unitTest = true
 
-func NewAppMock() *App {
-	app := App{}
+func NewAppMock() *application.App {
+	app := application.App{}
 
 	var drives []drive.Drive
 	var dumpers []dumper.Dumper
@@ -37,7 +38,7 @@ func NewAppMock() *App {
 		drives = append(
 			drives,
 			drive.NewLocalDrive("local1", "./tmp"),
-			drive.NewGoogleDrive("google1", "demo", "../../service-account.json"),
+			drive.NewGoogleDrive("google1", "demo", "../service-account.json"),
 		)
 		dumpers = append(dumpers, dumper.NewMysqlDumper(
 			"mysql1",
@@ -70,7 +71,7 @@ func NewAppMock() *App {
 		notifiers = append(notifiers, notifier.NewMailNotifier(mailerTransport, db, destinations))
 	}
 
-	app.Mode = APP_MODE_CLI
+	app.Mode = application.APP_MODE_CLI
 	app.Drives = drives
 	app.Dumpers = dumpers
 	app.Db = db

@@ -1,6 +1,6 @@
 //go:build test_integration
 
-package drive_test
+package tests_test
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var serviceAccount = "../../service-account.json"
+var serviceAccount = "../service-account.json"
 
 func TestGoogleDriveUploadFile(t *testing.T) {
 	googleDrive := drive.NewGoogleDrive("Google Drive", "demo", serviceAccount)

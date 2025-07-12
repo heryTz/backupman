@@ -1,15 +1,15 @@
-package service_test
+package tests_test
 
 import (
 	"testing"
 
-	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/service"
+	"github.com/herytz/backupman/tests"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBackupList(t *testing.T) {
-	app := application.NewAppMock()
+	app := tests.NewAppMock()
 	backup1Ids, err := service.Backup(app)
 	assert.NoError(t, err)
 	backup2Ids, err := service.Backup(app)

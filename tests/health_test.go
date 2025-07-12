@@ -1,19 +1,19 @@
 //go:build test_integration
 // +build test_integration
 
-package service_test
+package tests_test
 
 import (
 	"testing"
 
-	"github.com/herytz/backupman/core/application"
 	"github.com/herytz/backupman/core/lib"
 	"github.com/herytz/backupman/core/service"
+	"github.com/herytz/backupman/tests"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHealthSuccess(t *testing.T) {
-	app := application.NewAppMock()
+	app := tests.NewAppMock()
 	report, err := service.Health(app)
 	assert.NoError(t, err)
 	assert.Equal(t, lib.HEALTH_UP, report.Status)

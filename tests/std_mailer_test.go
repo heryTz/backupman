@@ -1,6 +1,6 @@
 //go:build test_integration
 
-package mailer_test
+package tests_test
 
 import (
 	"testing"

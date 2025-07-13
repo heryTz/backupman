@@ -91,8 +91,8 @@ http:
 The configuration should contain:
 
 1. [database](/docs/internal-database) : Backupman's internal database.
-2. [data sources](/docs/backup-sources) : The databases you want to back up.
-3. [drives](/docs/storage) : The storage drives where backups will be saved.
+2. [data sources](/docs/data-sources) : The databases you want to back up.
+3. [drives](/docs/category/drive) : The storage drives where backups will be saved.
 
 :::
 
@@ -150,7 +150,7 @@ curl http://localhost:8080/health | jq .
 
 ## 6. Trigger a Backup
 
-We are going to trigger a backup via HTTP API but you can also use the [cli tool](/docs/cli-commands) or a [cron job](/docs/http-server).
+We are going to trigger a backup via HTTP API but you can also use the [cli tool](/docs/cli) or a [cron job](/docs/http).
 
 ```bash
 curl -H "X-Api-Key: apikey1" -X POST http:/localhost:8080/api/backups | jq .

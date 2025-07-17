@@ -137,7 +137,7 @@ func BackupReportMail(backup *model.BackupFull) (string, error) {
 	}
 	for _, driveFile := range backup.DriveFiles {
 		data.UploadStatus = append(data.UploadStatus, UploadStatus{
-			Provider: driveFile.Provider,
+			Provider: driveFile.Label,
 			Status:   driveFile.Status,
 		})
 	}

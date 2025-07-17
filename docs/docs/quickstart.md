@@ -34,6 +34,12 @@ services:
       MYSQL_DATABASE: backupman
     volumes:
       - backupman_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      start_period: 30s
+      interval: 5s
 
   backupman:
     image: herytz/backupman
@@ -43,6 +49,9 @@ services:
       - ./config.yml:/app/config.yml
       - ./storage:/app/storage
     command: serve 
+    depends_on:
+      backupman_db:
+        condition: service_healthy
 
 volumes:
   backupman_db_data:

@@ -60,7 +60,14 @@ func NewApp(config AppConfig) *App {
 		case LocalDriveConfig:
 			drives[i] = drive.NewLocalDrive(config.Label, config.Folder)
 		case GoogleDriveConfig:
-			drives[i] = drive.NewGoogleDrive(config.Label, config.Folder, config.ServiceAccount)
+			switch config.AuthType {
+			case "serviceAccount":
+				drives[i] = drive.NewGoogleDriveWithServiceAccount(config.Label, config.Folder, config.ServiceAccountFile)
+			case "oauth2":
+				drives[i] = drive.NewGoogleDriveWithOauth2(config.Label, config.Folder, config.ClientSecretFile, config.TokenFile)
+			default:
+				log.Fatal("Unsupported google drive auth type")
+			}
 		default:
 			log.Fatal("Unsupported drive type")
 		}

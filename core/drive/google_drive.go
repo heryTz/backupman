@@ -2,6 +2,7 @@ package drive
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,30 +10,79 @@ import (
 	"path/filepath"
 	"time"
 
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	gdrive "google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
 )
 
-type GoogleDrive struct {
-	Label          string
-	Folder         string
-	serviceAccount string
+func (d *GoogleDrive) getDriveService() (*gdrive.Service, error) {
+	ctx := context.Background()
+	switch d.AuthType {
+	case "serviceAccount":
+		return gdrive.NewService(ctx, option.WithCredentialsFile(d.ServiceAccountFile))
+	case "oauth2":
+		b, err := os.ReadFile(d.ClientSecretFile)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read client secret file: %v", err)
+		}
+
+		config, err := google.ConfigFromJSON(b, gdrive.DriveFileScope)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse client secret file to config: %v", err)
+		}
+
+		f, err := os.Open(d.TokenFile)
+		if err != nil {
+			return nil, fmt.Errorf("unable to open token file: %v", err)
+		}
+		defer f.Close()
+		tok := &oauth2.Token{}
+		err = json.NewDecoder(f).Decode(tok)
+		if err != nil {
+			return nil, fmt.Errorf("unable to decode token file: %v", err)
+		}
+
+		client := config.Client(ctx, tok)
+		return gdrive.NewService(ctx, option.WithHTTPClient(client))
+	default:
+		return nil, fmt.Errorf("unknown auth type: %s", d.AuthType)
+	}
 }
 
-func NewGoogleDrive(label, folder, serviceAccount string) *GoogleDrive {
+type GoogleDrive struct {
+	Label              string
+	Folder             string
+	AuthType           string
+	ServiceAccountFile string
+	ClientSecretFile   string
+	TokenFile          string
+}
+
+func NewGoogleDriveWithServiceAccount(label, folder, serviceAccount string) *GoogleDrive {
 	drive := GoogleDrive{
-		Label:          label,
-		Folder:         folder,
-		serviceAccount: serviceAccount,
+		Label:              label,
+		Folder:             folder,
+		AuthType:           "serviceAccount",
+		ServiceAccountFile: serviceAccount,
+	}
+	return &drive
+}
+
+func NewGoogleDriveWithOauth2(label, folder, clientSecretFile, tokenFile string) *GoogleDrive {
+	drive := GoogleDrive{
+		Label:            label,
+		Folder:           folder,
+		AuthType:         "oauth2",
+		ClientSecretFile: clientSecretFile,
+		TokenFile:        tokenFile,
 	}
 	return &drive
 }
 
 func (d *GoogleDrive) Upload(srcPath string) (DriveFile, error) {
 	driveFile := DriveFile{}
-	ctx := context.Background()
-
-	srv, err := gdrive.NewService(ctx, option.WithCredentialsFile(d.serviceAccount))
+	srv, err := d.getDriveService()
 	if err != nil {
 		return driveFile, fmt.Errorf("[Google Drive] Unable to retrieve Drive client => %s", err)
 	}
@@ -75,9 +125,7 @@ func (d *GoogleDrive) Upload(srcPath string) (DriveFile, error) {
 }
 
 func (d *GoogleDrive) Delete(srcPath string) error {
-	ctx := context.Background()
-
-	srv, err := gdrive.NewService(ctx, option.WithCredentialsFile(d.serviceAccount))
+	srv, err := d.getDriveService()
 	if err != nil {
 		return fmt.Errorf("[Google Drive] Unable to retrieve Drive client => %s", err)
 	}

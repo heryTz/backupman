@@ -25,7 +25,10 @@ drives:
   - provider: google_drive
     label: Google Drive
     folder: demo
-    service_account: ./service-account.json
+    auth_type: serviceAccount # Can be serviceAccount or oauth2
+    service_account_file: ./service-account.json
+    # client_secret_file: ./client_secret.json
+    # token_file: ./token.json
 
 notifiers:
   mail:

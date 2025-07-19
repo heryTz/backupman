@@ -4,3 +4,5 @@ tmp
 config.yml
 config.*.yml
 backupman
+client-secret-file
+token-file

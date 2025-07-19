@@ -39,7 +39,7 @@ func NewAppMock() *application.App {
 		drives = append(
 			drives,
 			drive.NewLocalDrive("local1", "./tmp"),
-			drive.NewGoogleDrive("google1", "demo", "../service-account.json"),
+			drive.NewGoogleDriveWithServiceAccount("google1", "demo", "../service-account.json"),
 		)
 		dumpers = append(dumpers, dumper.NewMysqlDumper(
 			"mysql1",

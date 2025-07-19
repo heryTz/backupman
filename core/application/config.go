@@ -15,9 +15,10 @@ type LocalDriveConfig struct {
 	Folder string
 }
 type GoogleDriveConfig struct {
-	Label          string
-	Folder         string
-	ServiceAccount string
+	Label            string
+	Folder           string
+	ClientSecretFile string
+	TokenFile        string
 }
 
 type DataSourceConfig interface{}

@@ -60,7 +60,7 @@ func NewApp(config AppConfig) *App {
 		case LocalDriveConfig:
 			drives[i] = drive.NewLocalDrive(config.Label, config.Folder)
 		case GoogleDriveConfig:
-			drives[i] = drive.NewGoogleDrive(config.Label, config.Folder, config.ServiceAccount)
+			drives[i] = drive.NewGoogleDrive(config.Label, config.Folder, config.ClientSecretFile, config.TokenFile)
 		default:
 			log.Fatal("Unsupported drive type")
 		}

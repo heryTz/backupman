@@ -27,6 +27,23 @@ backupman [command]
 
 ## Commands
 
+### `auth-google`
+
+Authenticate with Google Drive using OAuth2
+
+**Usage:**
+
+```bash
+backupman auth-google
+```
+
+**Arguments:**
+
+| Argument | Description | Default |
+| :--- | :--- | :--- |
+| `client-secret-file` | Path to the client secret file. | `google-client-secret.json` |
+| `token-file` | Path that the token will be saved to. | `google-token.json` |
+
 ### `completion`
 
 Generate the autocompletion script for the specified shell.

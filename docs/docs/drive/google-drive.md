@@ -7,7 +7,6 @@ description: "Backupman can backup your data to Google Drive."
 
 Backupman can backup your data to Google Drive.
 
-
 ## Configuration
 
 ```yaml title="config.yml"
@@ -18,6 +17,8 @@ drives:
     client_secret_file: /path/to/your/google-client-secret.json
     token_file: /path/to/your/google-token.json
 ```
+
+Backupman will create a folder named `demo` in your Google Drive root directory.
 
 ## How to get the client secret and token
 

@@ -1,6 +1,7 @@
 bin
-service-account.json
 tmp
 config.yml
 config.*.yml
 backupman
+google-client-secret.json
+google-token.json

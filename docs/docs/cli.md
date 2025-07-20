@@ -18,6 +18,7 @@ Usage:
   backupman [command]
 
 Available Commands:
+  auth-google Authenticate with Google Drive using OAuth2
   completion  Generate the autocompletion script for the specified shell
   health      Health check
   help        Help about any command

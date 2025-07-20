@@ -37,6 +37,7 @@ func main() {
 	rootCmd.AddCommand(cmd.ServeBackup(versionConfig))
 	rootCmd.AddCommand(cmd.Version(versionConfig))
 	rootCmd.AddCommand(cmd.Health(versionConfig))
+	rootCmd.AddCommand(cmd.AuthGoogle(versionConfig))
 
 	err := rootCmd.Execute()
 	if err != nil {

@@ -45,7 +45,8 @@ type config struct {
 		// local
 		Folder string
 		// google drive
-		ServiceAccount string `yaml:"service_account"`
+		ClientSecretFile string `yaml:"client_secret_file"`
+		TokenFile        string `yaml:"token_file"`
 	}
 	Notifiers struct {
 		Mail struct {
@@ -146,9 +147,10 @@ func LoadYml(file string) (application.AppConfig, error) {
 			})
 		case "google_drive":
 			c.Drives = append(c.Drives, application.GoogleDriveConfig{
-				Label:          drive.Label,
-				Folder:         drive.Folder,
-				ServiceAccount: drive.ServiceAccount,
+				Label:            drive.Label,
+				Folder:           drive.Folder,
+				ClientSecretFile: drive.ClientSecretFile,
+				TokenFile:        drive.TokenFile,
 			})
 		default:
 			return c, fmt.Errorf("unsupported drive provider: %s", drive.Provider)

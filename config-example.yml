@@ -25,7 +25,8 @@ drives:
   - provider: google_drive
     label: Google Drive
     folder: demo
-    service_account: ./service-account.json
+    client_secret_file: ./google-client-secret.json
+    token_file: ./google-token.json
 
 notifiers:
   mail:

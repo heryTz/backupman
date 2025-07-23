@@ -43,6 +43,7 @@ backupman auth-google
 | :--- | :--- | :--- |
 | `client-secret-file` | Path to the client secret file. | `google-client-secret.json` |
 | `token-file` | Path that the token will be saved to. | `google-token.json` |
+| `open-url` | Open the authorization URL in the default web browser. | `true` |
 
 ### `completion`
 

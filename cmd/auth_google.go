@@ -20,6 +20,7 @@ import (
 func AuthGoogle(versionConfig application.VersionConfig) *cobra.Command {
 	var clientSecretFile string
 	var tokenFile string
+	var openUrl bool
 
 	cmd := &cobra.Command{
 		Use:   "auth-google",
@@ -37,9 +38,11 @@ func AuthGoogle(versionConfig application.VersionConfig) *cobra.Command {
 
 			authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 			fmt.Printf("Go to the following link in your browser then type the authorization code: \n\n\033[33m%s\033[0m\n\n", authURL)
-			err = lib.OpenURL(authURL)
-			if err != nil {
-				log.Fatalf("Unable to open URL in browser: %v", err)
+			if openUrl {
+				err = lib.OpenURL(authURL)
+				if err != nil {
+					log.Fatalf("Unable to open URL in browser: %v", err)
+				}
 			}
 
 			fmt.Print("Enter the URL you were redirected to after authorization: \n\n\033[33m")
@@ -77,6 +80,7 @@ func AuthGoogle(versionConfig application.VersionConfig) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVar(&openUrl, "open-url", true, "Open the authorization URL in the default web browser")
 	cmd.Flags().StringVar(&clientSecretFile, "client-secret-file", "google-client-secret.json", "Path to the client secret file")
 	cmd.Flags().StringVar(&tokenFile, "token-file", "google-token.json", "Path that the token will be saved to")
 

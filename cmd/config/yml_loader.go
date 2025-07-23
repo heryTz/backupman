@@ -61,7 +61,7 @@ type config struct {
 				Email string
 			}
 		}
-		Webhooks struct {
+		Webhook struct {
 			Enabled   string
 			Endpoints []struct {
 				Name  string
@@ -166,8 +166,8 @@ func LoadYml(file string) (application.AppConfig, error) {
 	}
 
 	webhooks := []application.WebhookNotifierConfig{}
-	if ymlConfig.Notifiers.Webhooks.Enabled == "true" {
-		for _, endpoint := range ymlConfig.Notifiers.Webhooks.Endpoints {
+	if ymlConfig.Notifiers.Webhook.Enabled == "true" {
+		for _, endpoint := range ymlConfig.Notifiers.Webhook.Endpoints {
 			webhooks = append(webhooks, application.WebhookNotifierConfig{
 				Name:  endpoint.Name,
 				Url:   endpoint.Url,

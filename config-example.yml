@@ -41,7 +41,7 @@ notifiers:
         email: admin@yopmail.fr
       - name: Admin 2
         email: admin2@yopmail.fr
-  webhooks:
+  webhook:
     enabled: true
     endpoints:
       - name: My Webhook

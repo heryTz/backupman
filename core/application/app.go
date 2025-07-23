@@ -138,7 +138,7 @@ func NewApp(config AppConfig) *App {
 		for _, config := range webhookConfig {
 			webhookNotifierConfigs = append(webhookNotifierConfigs, notifier.WebhookNotifierConfig{
 				Name:  config.Name,
-				Url:   config.Name,
+				Url:   config.Url,
 				Token: config.Token,
 			})
 		}

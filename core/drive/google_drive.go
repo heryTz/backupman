@@ -35,12 +35,12 @@ func NewGoogleDrive(label, folder, clientSecretFile, tokenFile string) *GoogleDr
 
 func (d *GoogleDrive) getDriveService() (*gdrive.Service, error) {
 	ctx := context.Background()
-	b, err := os.ReadFile(d.ClientSecretFile)
+	secretFile, err := os.ReadFile(d.ClientSecretFile)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read client secret file: %v", err)
 	}
 
-	config, err := google.ConfigFromJSON(b, gdrive.DriveFileScope)
+	config, err := google.ConfigFromJSON(secretFile, gdrive.DriveFileScope)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse client secret file to config: %v", err)
 	}
@@ -54,6 +54,20 @@ func (d *GoogleDrive) getDriveService() (*gdrive.Service, error) {
 	err = json.NewDecoder(f).Decode(tok)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode token file: %v", err)
+	}
+
+	// Temp fix to see why some accounts have expired or revoked token issues
+	if !tok.Valid() {
+		ts := config.TokenSource(ctx, tok)
+		tok, err = ts.Token()
+		if err != nil {
+			return nil, fmt.Errorf("unable to refresh token: %v", err)
+		}
+		tf, err := os.Create(d.TokenFile)
+		if err == nil {
+			defer tf.Close()
+			_ = json.NewEncoder(tf).Encode(tok)
+		}
 	}
 
 	client := config.Client(ctx, tok)

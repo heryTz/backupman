@@ -31,7 +31,7 @@ type config struct {
 	DataSources []struct {
 		Provider string
 		Label    string
-		// mysql
+		// mysql, postgres
 		Host      string
 		Port      int
 		User      string
@@ -39,6 +39,8 @@ type config struct {
 		DdName    string `yaml:"db_name"`
 		TmpFolder string `yaml:"tmp_folder"`
 		Tls       string
+		// sqlite
+		DbPath string `yaml:"db_path"`
 	} `yaml:"data_sources"`
 	Drives []struct {
 		Provider string
@@ -155,6 +157,12 @@ func LoadYml(file string) (application.AppConfig, error) {
 				TmpFolder: ds.TmpFolder,
 				Label:     ds.Label,
 				Tls:       ds.Tls == "true",
+			})
+		case "sqlite":
+			c.DataSources = append(c.DataSources, application.SqliteDataSourceConfig{
+				Label:     ds.Label,
+				TmpFolder: ds.TmpFolder,
+				DbPath:    ds.DbPath,
 			})
 		default:
 			return c, fmt.Errorf("unsupported data source provider: %s", ds.Provider)

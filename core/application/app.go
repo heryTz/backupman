@@ -93,6 +93,12 @@ func NewApp(config AppConfig) *App {
 				config.Database,
 				config.Tls,
 			)
+		case SqliteDataSourceConfig:
+			dumpers[i] = dumper.NewSqliteDumper(
+				config.Label,
+				config.TmpFolder,
+				config.DbPath,
+			)
 		default:
 			log.Fatal("Unsupported database type")
 		}

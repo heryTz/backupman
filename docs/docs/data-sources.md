@@ -47,3 +47,16 @@ data_sources:
     tmp_folder: ./tmp/postgres
 ```
 
+## SQLite
+
+You can use the following configuration:
+
+```yaml title="config.yml"
+data_sources:
+  - provider: sqlite
+    label: SQLite 1
+    db_path: /path/to/database.db
+    # Temporary folder used by Backupman (for example, to store dumps before uploading to cloud)
+    tmp_folder: ./tmp/sqlite
+```
+

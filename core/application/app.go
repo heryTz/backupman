@@ -82,6 +82,17 @@ func NewApp(config AppConfig) *App {
 				config.Database,
 				config.Tls,
 			)
+		case PostgresDataSourceConfig:
+			dumpers[i] = dumper.NewPostgresDumper(
+				config.Label,
+				config.TmpFolder,
+				config.Host,
+				config.Port,
+				config.User,
+				config.Password,
+				config.Database,
+				config.Tls,
+			)
 		default:
 			log.Fatal("Unsupported database type")
 		}

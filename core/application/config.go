@@ -32,6 +32,16 @@ type MysqlDataSourceConfig struct {
 	Database  string
 	Tls       string
 }
+type PostgresDataSourceConfig struct {
+	Label     string
+	TmpFolder string
+	Host      string
+	Port      int
+	User      string
+	Password  string
+	Database  string
+	Tls       bool
+}
 
 type DbConfig interface{}
 type MysqlDbConfig struct {

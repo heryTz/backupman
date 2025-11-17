@@ -99,6 +99,8 @@ func LoadYml(file string) (application.AppConfig, error) {
 	c.Http = httpConfig
 
 	switch ymlConfig.Database.Provider {
+	case "in_memory":
+		c.Db = application.MemoryDbConfig{}
 	case "mysql":
 		c.Db = application.MysqlDbConfig{
 			Host:     ymlConfig.Database.Host,

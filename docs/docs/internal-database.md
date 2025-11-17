@@ -21,3 +21,12 @@ database:
   password: ChangeMe
   tls: false
 ```
+
+## Memory
+
+You can use the following configuration:
+
+```yaml title="config.yml"
+database:
+  provider: memory
+```

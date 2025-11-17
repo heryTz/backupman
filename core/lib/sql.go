@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func NewMysqlConnection(host string, port int, user string, password string, database string, tls string) (*sql.DB, error) {
@@ -37,6 +38,14 @@ func NewPostgresConnection(host string, port int, user string, password string, 
 	dbConn, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to PostgreSQL: %w", err)
+	}
+	return dbConn, nil
+}
+
+func NewSqliteConnection(dbPath string) (*sql.DB, error) {
+	dbConn, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to SQLite: %w", err)
 	}
 	return dbConn, nil
 }

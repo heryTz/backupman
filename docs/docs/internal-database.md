@@ -37,7 +37,23 @@ database:
   tls: false
 ```
 
+## SQLite
+
+You can use the following configuration:
+
+```yaml title="config.yml"
+database:
+  provider: sqlite
+  db_path: /var/lib/backupman/backupman.db
+```
+
+:::note
+The database file and directory will be created automatically if they don't exist. Make sure the application has write permissions to the specified path.
+:::
+
 ## Memory
+
+The memory provider stores data in RAM and is useful for development and testing. **Data is lost when the application stops.**
 
 You can use the following configuration:
 

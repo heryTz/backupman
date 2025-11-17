@@ -1,5 +1,5 @@
 database:
-  ## mysql
+  # MYSQL
   provider: mysql
   host: 127.0.0.1
   port: 3306
@@ -7,7 +7,8 @@ database:
   user: root
   password: root
   tls: false
-  ## postgres
+  #
+  ## POSTGRES
   # provider: postgres
   # host: 127.0.0.1
   # port: 5432
@@ -15,7 +16,12 @@ database:
   # user: postgres
   # password: postgres
   # tls: false
-  ## memory
+  #
+  ## SQLITE
+  # provider: sqlite
+  # db_path: backupman.db
+  #
+  ## MEMORY
   # provider: memory
 
 data_sources:

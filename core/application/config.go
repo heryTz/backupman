@@ -50,6 +50,9 @@ type PostgresDbConfig struct {
 	Database string
 	Tls      bool
 }
+type SqliteDbConfig struct {
+	DbPath string
+}
 type MemoryDbConfig struct{}
 
 type MailNotifierDestinationConfig struct {

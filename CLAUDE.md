@@ -91,9 +91,11 @@ main.go              # Entry point, CLI setup with Cobra
 - `mailer.Mailer` interface for email transport
 
 **3. Database Providers**
-- **MySQL:** Default production database using `dao/mysql/*`
+- **MySQL:** Production database using `dao/mysql/*`
+- **PostgreSQL:** Production database using `dao/postgres/*`
+- **SQLite:** Lightweight production database using `dao/sqlite/*` - suitable for single-instance deployments
 - **Memory:** In-memory database for development/testing using `dao/memory/*`
-- Configured via `config.yml` (`database.provider: mysql` or `database.provider: memory`)
+- Configured via `config.yml` (`database.provider: mysql`, `postgres`, `sqlite`, or `memory`)
 
 **4. Dual Execution Mode**
 - `APP_MODE_CLI`: Synchronous backup execution, blocking retention cleanup
@@ -112,12 +114,19 @@ main.go              # Entry point, CLI setup with Cobra
 
 `config.yml` is the single source of configuration. Key sections:
 
-- `database`: Internal DB for tracking backups (mysql or memory provider)
+- `database`: Internal DB for tracking backups (mysql, postgres, sqlite, or memory provider)
 - `data_sources`: List of databases to backup (MySQL, PostgreSQL, etc.)
 - `drives`: Storage destinations (local, google_drive)
 - `notifiers`: Email (SMTP) and webhook configurations
 - `retention`: Auto-cleanup based on age (in days)
 - `http`: API server settings, API keys, cron schedule for automated backups
+
+**SQLite Configuration Example:**
+```yaml
+database:
+  provider: sqlite
+  db_path: /var/lib/backupman/backupman.db  # Path to SQLite database file
+```
 
 **Important:** HTTP server includes the cron automation feature via `http.SetupScheduler()`. This will eventually be decoupled into a standalone daemon.
 
@@ -158,23 +167,27 @@ Scheduler: When `http.backup_job.enabled: true`, the server starts a cron job to
 
 - Tests located in `/tests` directory
 - Use `tests/app_mock.go` for creating test fixtures
-- Integration tests require MySQL (see `backup_dao_mysql_test.go`)
+- Integration tests available for MySQL, PostgreSQL, and SQLite (see `backup_dao_*_test.go`)
+- Run integration tests with: `go test -tags=test_integration ./tests`
 - Mock implementations available for drives, dumpers, mailers, notifiers
 - Run `go test ./...` before committing
 
 ## Database Migrations
 
-MySQL migrations are in `migration/mysql/`:
+Database migrations are organized by provider:
+- `migration/mysql/`: MySQL migrations
+- `migration/postgres/`: PostgreSQL migrations
+- `migration/sqlite/`: SQLite migrations
 - Written as Go code, not SQL files
-- Applied automatically via `migration.RunMigration()` on startup when using MySQL provider
+- Applied automatically via `migration.Run()` on startup for MySQL, PostgreSQL, and SQLite providers
 - Create new migration files following the pattern `N_description.go`
 
 ## Current Development
 
-**Branch:** `36-postgres-db-support` - Adding PostgreSQL database support
-- Implement `dumper.PostgresDumper` (similar to `dumper.MysqlDumper`)
-- Update `core/application/app.go` to handle PostgreSQL data source config
-- Add PostgreSQL test coverage
+**Branch:** `37-sqlite-db-support` - Adding SQLite database support for internal database
+- SQLite can be used as the internal database for tracking backups
+- Suitable for lightweight, single-instance deployments
+- Uses `github.com/mattn/go-sqlite3` driver
 
 ## Project Dependencies
 
@@ -183,6 +196,8 @@ Key external libraries:
 - `gin-gonic/gin` - HTTP framework
 - `go-co-op/gocron/v2` - Cron scheduling
 - `go-sql-driver/mysql` - MySQL driver
+- `jackc/pgx/v5` - PostgreSQL driver
+- `mattn/go-sqlite3` - SQLite driver
 - `golang.org/x/oauth2`, `google.golang.org/api` - Google Drive integration
 - `goccy/go-yaml` - YAML config parsing
 - `emersion/go-smtp` - Email sending

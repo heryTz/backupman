@@ -7,6 +7,7 @@ import (
 	"github.com/herytz/backupman/core/dao/memory"
 	"github.com/herytz/backupman/core/dao/mysql"
 	"github.com/herytz/backupman/core/dao/postgres"
+	"github.com/herytz/backupman/core/dao/sqlite"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/dumper"
 	"github.com/herytz/backupman/core/lib"
@@ -118,6 +119,14 @@ func NewApp(config AppConfig) *App {
 		db.Backup = postgres.NewBackupDaoPostgres(dbConn)
 		db.DriveFile = postgres.NewDriveFileDaoPostgres(dbConn)
 		db.Health = lib.NewHealthPostgres(dbConn)
+	case SqliteDbConfig:
+		dbConn, err := lib.NewSqliteConnection(config.DbPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		db.Backup = sqlite.NewBackupDaoSqlite(dbConn)
+		db.DriveFile = sqlite.NewDriveFileDaoSqlite(dbConn)
+		db.Health = lib.NewHealthSqlite(dbConn)
 	case MemoryDbConfig:
 		memoryDb := memory.NewMemoryDb()
 		db.Backup = memory.NewBackupDaoMemory(memoryDb)

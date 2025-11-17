@@ -42,6 +42,14 @@ type MysqlDbConfig struct {
 	Database string
 	Tls      string
 }
+type PostgresDbConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Database string
+	Tls      bool
+}
 type MemoryDbConfig struct{}
 
 type MailNotifierDestinationConfig struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/herytz/backupman/core/dao"
 	"github.com/herytz/backupman/core/dao/memory"
 	"github.com/herytz/backupman/core/dao/mysql"
+	"github.com/herytz/backupman/core/dao/postgres"
 	"github.com/herytz/backupman/core/drive"
 	"github.com/herytz/backupman/core/dumper"
 	"github.com/herytz/backupman/core/lib"
@@ -88,7 +89,7 @@ func NewApp(config AppConfig) *App {
 	db := dao.Dao{}
 	switch config := config.Db.(type) {
 	case MysqlDbConfig:
-		dbConn, err := lib.NewConnection(
+		dbConn, err := lib.NewMysqlConnection(
 			config.Host,
 			config.Port,
 			config.User,
@@ -102,6 +103,21 @@ func NewApp(config AppConfig) *App {
 		db.Backup = mysql.NewBackupDaoMysql(dbConn)
 		db.DriveFile = mysql.NewDriveFileDaoMysql(dbConn)
 		db.Health = lib.NewHealthMysql(dbConn)
+	case PostgresDbConfig:
+		dbConn, err := lib.NewPostgresConnection(
+			config.Host,
+			config.Port,
+			config.User,
+			config.Password,
+			config.Database,
+			config.Tls,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		db.Backup = postgres.NewBackupDaoPostgres(dbConn)
+		db.DriveFile = postgres.NewDriveFileDaoPostgres(dbConn)
+		db.Health = lib.NewHealthPostgres(dbConn)
 	case MemoryDbConfig:
 		memoryDb := memory.NewMemoryDb()
 		db.Backup = memory.NewBackupDaoMemory(memoryDb)

@@ -110,6 +110,15 @@ func LoadYml(file string) (application.AppConfig, error) {
 			Database: ymlConfig.Database.DbName,
 			Tls:      ymlConfig.Database.Tls,
 		}
+	case "postgres":
+		c.Db = application.PostgresDbConfig{
+			Host:     ymlConfig.Database.Host,
+			Port:     ymlConfig.Database.Port,
+			User:     ymlConfig.Database.User,
+			Password: ymlConfig.Database.Password,
+			Database: ymlConfig.Database.DbName,
+			Tls:      ymlConfig.Database.Tls == "true",
+		}
 	default:
 		return c, fmt.Errorf("unsupported database provider: %s", ymlConfig.Database.Provider)
 	}

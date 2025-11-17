@@ -1,4 +1,15 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: backupman
+    ports:
+      - 5433:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   mariadb:
     image: mariadb:10.10.3
     restart: unless-stopped
@@ -8,7 +19,7 @@ services:
     ports:
       - 3307:3306
     volumes:
-      - backupman:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
 
   adminer:
     image: adminer
@@ -27,4 +38,5 @@ services:
       - "8026:8025"
 
 volumes:
-  backupman:
+  postgres_data:
+  mysql_data:

@@ -28,3 +28,22 @@ data_sources:
     # Temporary folder used by Backupman (for example, to store dumps before uploading to cloud)
     tmp_folder: ./tmp/mysql
 ```
+
+## PostgreSQL
+
+You can use the following configuration:
+
+```yaml title="config.yml"
+data_sources:
+  - provider: postgres
+    label: PostgreSQL 1
+    host: 127.0.0.1
+    port: 5432
+    db_name: ChangeMe
+    user: ChangeMe
+    password: ChangeMe
+    tls: false
+    # Temporary folder used by Backupman (for example, to store dumps before uploading to cloud)
+    tmp_folder: ./tmp/postgres
+```
+

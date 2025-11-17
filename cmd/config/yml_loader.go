@@ -145,6 +145,17 @@ func LoadYml(file string) (application.AppConfig, error) {
 				Label:     ds.Label,
 				Tls:       ds.Tls,
 			})
+		case "postgres":
+			c.DataSources = append(c.DataSources, application.PostgresDataSourceConfig{
+				Host:      ds.Host,
+				Port:      ds.Port,
+				User:      ds.User,
+				Password:  ds.Password,
+				Database:  ds.DdName,
+				TmpFolder: ds.TmpFolder,
+				Label:     ds.Label,
+				Tls:       ds.Tls == "true",
+			})
 		default:
 			return c, fmt.Errorf("unsupported data source provider: %s", ds.Provider)
 		}

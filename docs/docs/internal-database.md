@@ -22,6 +22,21 @@ database:
   tls: false
 ```
 
+## PostgreSQL
+
+You can use the following configuration:
+
+```yaml title="config.yml"
+database:
+  provider: postgres
+  host: 127.0.0.1
+  port: 5432
+  db_name: ChangeMe
+  user: ChangeMe
+  password: ChangeMe
+  tls: false
+```
+
 ## Memory
 
 You can use the following configuration:

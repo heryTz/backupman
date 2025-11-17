@@ -1,14 +1,16 @@
 package lib
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewConnection(host string, port int, user string, password string, database string, tls string) (*sql.DB, error) {
+func NewMysqlConnection(host string, port int, user string, password string, database string, tls string) (*sql.DB, error) {
 	cfg := mysql.NewConfig()
 	cfg.Addr = fmt.Sprintf("%s:%d", host, port)
 	cfg.User = user
@@ -23,6 +25,24 @@ func NewConnection(host string, port int, user string, password string, database
 		return nil, fmt.Errorf("failed to connect to MySQL: %w", err)
 	}
 	return dbConn, nil
+}
+
+func NewPostgresConnection(host string, port int, user string, password string, database string, tls bool) (*pgxpool.Pool, error) {
+	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s", user, password, host, port, database)
+	if tls {
+		connString += "?sslmode=require"
+	} else {
+		connString += "?sslmode=disable"
+	}
+	dbConn, err := pgxpool.New(context.Background(), connString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to PostgreSQL: %w", err)
+	}
+	return dbConn, nil
+}
+
+func NewConnection(host string, port int, user string, password string, database string, tls string) (*sql.DB, error) {
+	return NewMysqlConnection(host, port, user, password, database, tls)
 }
 
 type SqlNullableTime struct {

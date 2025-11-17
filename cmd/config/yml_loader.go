@@ -23,6 +23,7 @@ type config struct {
 		Host     string
 		Port     int
 		DbName   string `yaml:"db_name"`
+		DbPath   string `yaml:"db_path"`
 		User     string
 		Password string
 		Tls      string
@@ -99,7 +100,7 @@ func LoadYml(file string) (application.AppConfig, error) {
 	c.Http = httpConfig
 
 	switch ymlConfig.Database.Provider {
-	case "in_memory":
+	case "memory":
 		c.Db = application.MemoryDbConfig{}
 	case "mysql":
 		c.Db = application.MysqlDbConfig{
@@ -118,6 +119,10 @@ func LoadYml(file string) (application.AppConfig, error) {
 			Password: ymlConfig.Database.Password,
 			Database: ymlConfig.Database.DbName,
 			Tls:      ymlConfig.Database.Tls == "true",
+		}
+	case "sqlite":
+		c.Db = application.SqliteDbConfig{
+			DbPath: ymlConfig.Database.DbPath,
 		}
 	default:
 		return c, fmt.Errorf("unsupported database provider: %s", ymlConfig.Database.Provider)

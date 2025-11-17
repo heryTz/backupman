@@ -42,6 +42,11 @@ type PostgresDataSourceConfig struct {
 	Database  string
 	Tls       bool
 }
+type SqliteDataSourceConfig struct {
+	Label     string
+	TmpFolder string
+	DbPath    string
+}
 
 type DbConfig interface{}
 type MysqlDbConfig struct {

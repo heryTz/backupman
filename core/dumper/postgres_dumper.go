@@ -51,14 +51,14 @@ SET client_min_messages = warning;
 
 {{range .Tables}}
 --
--- Table structure for table {{ .Name }}
+-- Table structure for table "{{ .Name }}"
 --
 
-DROP TABLE IF EXISTS {{ .Name }} CASCADE;
+DROP TABLE IF EXISTS "{{ .Name }}" CASCADE;
 {{ .SQL }};
 
 --
--- Dumping data for table {{ .Name }}
+-- Dumping data for table "{{ .Name }}"
 --
 
 {{ if .Values }}
@@ -228,7 +228,7 @@ func (p *PostgresDumper) createTableSQL(name string) (string, error) {
 		}
 
 		// Build column definition
-		colDef := fmt.Sprintf("%s %s", columnName, p.mapDataType(dataType, charMaxLength))
+		colDef := fmt.Sprintf("\"%s\" %s", columnName, p.mapDataType(dataType, charMaxLength))
 
 		if isNullable == "NO" {
 			colDef += " NOT NULL"
@@ -265,7 +265,7 @@ func (p *PostgresDumper) createTableSQL(name string) (string, error) {
 		if err := pkRows.Scan(&colName); err != nil {
 			return "", fmt.Errorf("failed to scan primary key column: %s", err)
 		}
-		pkColumns = append(pkColumns, colName)
+		pkColumns = append(pkColumns, fmt.Sprintf("\"%s\"", colName))
 	}
 
 	if len(pkColumns) > 0 {
@@ -273,7 +273,7 @@ func (p *PostgresDumper) createTableSQL(name string) (string, error) {
 		columnDefs = append(columnDefs, pkDef)
 	}
 
-	createSQL := fmt.Sprintf("CREATE TABLE %s (\n  %s\n)", name, strings.Join(columnDefs, ",\n  "))
+	createSQL := fmt.Sprintf("CREATE TABLE \"%s\" (\n  %s\n)", name, strings.Join(columnDefs, ",\n  "))
 	return createSQL, nil
 }
 
@@ -303,7 +303,7 @@ func (p *PostgresDumper) mapDataType(dataType string, charMaxLength *int) string
 }
 
 func (p *PostgresDumper) createTableValues(name string) (string, error) {
-	query := fmt.Sprintf("SELECT * FROM %s", name)
+	query := fmt.Sprintf("SELECT * FROM \"%s\"", name)
 	rows, err := p.db.Query(context.Background(), query)
 	if err != nil {
 		return "", fmt.Errorf("cannot get table %s values: %s", name, err)
@@ -351,7 +351,7 @@ func (p *PostgresDumper) createTableValues(name string) (string, error) {
 			}
 		}
 
-		insertStatements = append(insertStatements, fmt.Sprintf("INSERT INTO %s VALUES (%s);", name, strings.Join(dataStrings, ", ")))
+		insertStatements = append(insertStatements, fmt.Sprintf("INSERT INTO \"%s\" VALUES (%s);", name, strings.Join(dataStrings, ", ")))
 	}
 
 	if err = rows.Err(); err != nil {

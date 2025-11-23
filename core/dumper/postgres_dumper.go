@@ -7,12 +7,14 @@ import (
 	"log"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/herytz/backupman/core/lib"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -32,6 +34,7 @@ type postgresDump struct {
 	DumpVersion   string
 	ServerVersion string
 	Tables        []*postgresTable
+	ForeignKeys   []string
 	CompleteTime  string
 }
 
@@ -49,6 +52,9 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+-- Disable foreign key checks
+SET session_replication_role = 'replica';
+
 {{range .Tables}}
 --
 -- Table structure for table "{{ .Name }}"
@@ -65,6 +71,19 @@ DROP TABLE IF EXISTS "{{ .Name }}" CASCADE;
 {{ .Values }}
 {{ end }}
 {{ end }}
+
+{{ if .ForeignKeys }}
+--
+-- Foreign key constraints
+--
+
+{{ range .ForeignKeys }}
+{{ . }};
+{{ end }}
+{{ end }}
+
+-- Re-enable foreign key checks
+SET session_replication_role = 'origin';
 
 -- Dump completed on {{ .CompleteTime }}
 `
@@ -129,6 +148,11 @@ func (p *PostgresDumper) Dump() (string, error) {
 			return "", err
 		}
 		data.Tables = append(data.Tables, t)
+	}
+
+	data.ForeignKeys, err = p.getForeignKeys()
+	if err != nil {
+		return "", err
 	}
 
 	data.CompleteTime = time.Now().String()
@@ -245,12 +269,13 @@ func (p *PostgresDumper) createTableSQL(name string) (string, error) {
 		return "", fmt.Errorf("error iterating columns: %s", err)
 	}
 
-	// Get primary key constraint
 	pkQuery := `
 		SELECT a.attname
 		FROM pg_index i
+		JOIN pg_class c ON c.oid = i.indrelid
+		JOIN pg_namespace n ON n.oid = c.relnamespace
 		JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
-		WHERE i.indrelid = $1::regclass AND i.indisprimary
+		WHERE n.nspname = 'public' AND c.relname = $1 AND i.indisprimary
 		ORDER BY a.attnum
 	`
 	pkRows, err := p.db.Query(context.Background(), pkQuery, name)
@@ -273,8 +298,138 @@ func (p *PostgresDumper) createTableSQL(name string) (string, error) {
 		columnDefs = append(columnDefs, pkDef)
 	}
 
+	uniqueQuery := `
+		SELECT
+			ic.relname AS index_name,
+			array_agg(a.attname ORDER BY array_position(i.indkey, a.attnum))
+		FROM pg_index i
+		JOIN pg_class c ON c.oid = i.indrelid
+		JOIN pg_class ic ON ic.oid = i.indexrelid
+		JOIN pg_namespace n ON n.oid = c.relnamespace
+		JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY(i.indkey)
+		WHERE n.nspname = 'public'
+		AND c.relname = $1
+		AND i.indisunique
+		AND NOT i.indisprimary
+		GROUP BY ic.relname
+	`
+	uniqueRows, err := p.db.Query(context.Background(), uniqueQuery, name)
+	if err != nil {
+		return "", fmt.Errorf("failed to get unique constraints for table %s: %s", name, err)
+	}
+	defer uniqueRows.Close()
+
+	for uniqueRows.Next() {
+		var conName string
+		var columns []string
+		if err := uniqueRows.Scan(&conName, &columns); err != nil {
+			return "", fmt.Errorf("failed to scan unique constraint: %s", err)
+		}
+		quotedCols := make([]string, len(columns))
+		for i, col := range columns {
+			quotedCols[i] = fmt.Sprintf("\"%s\"", col)
+		}
+		uniqueDef := fmt.Sprintf("CONSTRAINT \"%s\" UNIQUE (%s)", conName, strings.Join(quotedCols, ", "))
+		columnDefs = append(columnDefs, uniqueDef)
+	}
+
+	checkQuery := `
+		SELECT con.conname, pg_get_constraintdef(con.oid)
+		FROM pg_constraint con
+		JOIN pg_class rel ON rel.oid = con.conrelid
+		JOIN pg_namespace nsp ON nsp.oid = rel.relnamespace
+		WHERE con.contype = 'c'
+		AND nsp.nspname = 'public'
+		AND rel.relname = $1
+	`
+	checkRows, err := p.db.Query(context.Background(), checkQuery, name)
+	if err != nil {
+		return "", fmt.Errorf("failed to get check constraints for table %s: %s", name, err)
+	}
+	defer checkRows.Close()
+
+	for checkRows.Next() {
+		var conName, conDef string
+		if err := checkRows.Scan(&conName, &conDef); err != nil {
+			return "", fmt.Errorf("failed to scan check constraint: %s", err)
+		}
+		checkDef := fmt.Sprintf("CONSTRAINT \"%s\" %s", conName, conDef)
+		columnDefs = append(columnDefs, checkDef)
+	}
+
 	createSQL := fmt.Sprintf("CREATE TABLE \"%s\" (\n  %s\n)", name, strings.Join(columnDefs, ",\n  "))
 	return createSQL, nil
+}
+
+func (p *PostgresDumper) getForeignKeys() ([]string, error) {
+	fkQuery := `
+		SELECT
+			cl.relname AS table_name,
+			con.conname,
+			array_agg(a.attname ORDER BY u.ord),
+			cl2.relname AS ref_table,
+			array_agg(a2.attname ORDER BY u2.ord),
+			con.confupdtype::text,
+			con.confdeltype::text
+		FROM pg_constraint con
+		JOIN pg_class cl ON cl.oid = con.conrelid
+		JOIN pg_namespace nsp ON nsp.oid = cl.relnamespace
+		JOIN pg_class cl2 ON cl2.oid = con.confrelid
+		CROSS JOIN LATERAL unnest(con.conkey) WITH ORDINALITY AS u(attnum, ord)
+		JOIN pg_attribute a ON a.attrelid = cl.oid AND a.attnum = u.attnum
+		CROSS JOIN LATERAL unnest(con.confkey) WITH ORDINALITY AS u2(attnum, ord)
+		JOIN pg_attribute a2 ON a2.attrelid = cl2.oid AND a2.attnum = u2.attnum
+		WHERE con.contype = 'f'
+		AND nsp.nspname = 'public'
+		GROUP BY cl.relname, con.conname, cl2.relname, con.confupdtype, con.confdeltype
+		ORDER BY cl.relname, con.conname
+	`
+	rows, err := p.db.Query(context.Background(), fkQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get foreign keys: %s", err)
+	}
+	defer rows.Close()
+
+	var fks []string
+	for rows.Next() {
+		var tableName, conName, refTable string
+		var columns, refColumns []string
+		var updateAction, deleteAction string
+		if err := rows.Scan(&tableName, &conName, &columns, &refTable, &refColumns, &updateAction, &deleteAction); err != nil {
+			return nil, fmt.Errorf("failed to scan foreign key: %s", err)
+		}
+		quotedCols := make([]string, len(columns))
+		for i, col := range columns {
+			quotedCols[i] = fmt.Sprintf("\"%s\"", col)
+		}
+		quotedRefCols := make([]string, len(refColumns))
+		for i, col := range refColumns {
+			quotedRefCols[i] = fmt.Sprintf("\"%s\"", col)
+		}
+		fk := fmt.Sprintf("ALTER TABLE \"%s\" ADD CONSTRAINT \"%s\" FOREIGN KEY (%s) REFERENCES \"%s\" (%s) ON UPDATE %s ON DELETE %s",
+			tableName, conName, strings.Join(quotedCols, ", "), refTable, strings.Join(quotedRefCols, ", "),
+			p.mapFkAction(updateAction), p.mapFkAction(deleteAction))
+		fks = append(fks, fk)
+	}
+
+	return fks, rows.Err()
+}
+
+func (p *PostgresDumper) mapFkAction(action string) string {
+	switch action {
+	case "a":
+		return "NO ACTION"
+	case "r":
+		return "RESTRICT"
+	case "c":
+		return "CASCADE"
+	case "n":
+		return "SET NULL"
+	case "d":
+		return "SET DEFAULT"
+	default:
+		return "NO ACTION"
+	}
 }
 
 func (p *PostgresDumper) mapDataType(dataType string, charMaxLength *int) string {
@@ -345,6 +500,9 @@ func (p *PostgresDumper) createTableValues(name string) (string, error) {
 					}
 				case time.Time:
 					dataStrings[i] = fmt.Sprintf("'%s'", v.Format("2006-01-02 15:04:05"))
+				case pgtype.Numeric:
+					f, _ := v.Float64Value()
+					dataStrings[i] = strconv.FormatFloat(f.Float64, 'f', -1, 64)
 				default:
 					dataStrings[i] = fmt.Sprintf("%v", v)
 				}

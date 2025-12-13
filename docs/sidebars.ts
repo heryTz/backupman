@@ -22,7 +22,7 @@ const sidebars: SidebarsConfig = {
         type: "generated-index",
       },
       collapsed: true,
-      items: ["drive/local-drive", "drive/google-drive"],
+      items: ["drive/local-drive", "drive/google-drive", "drive/s3-drive"],
     },
     "notifiers",
     "retention-policies",

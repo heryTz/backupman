@@ -20,6 +20,16 @@ type GoogleDriveConfig struct {
 	ClientSecretFile string
 	TokenFile        string
 }
+type S3DriveConfig struct {
+	Label          string
+	Bucket         string
+	Region         string
+	AccessKey      string
+	SecretKey      string
+	Endpoint       string
+	Prefix         string
+	ForcePathStyle bool
+}
 
 type DataSourceConfig interface{}
 type MysqlDataSourceConfig struct {

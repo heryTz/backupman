@@ -1,7 +1,8 @@
 package drive
 
 type DriveFile struct {
-	Path string
+	Path     string
+	Checksum string
 }
 
 type Drive interface {

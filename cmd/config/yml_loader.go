@@ -50,6 +50,14 @@ type config struct {
 		// google drive
 		ClientSecretFile string `yaml:"client_secret_file"`
 		TokenFile        string `yaml:"token_file"`
+		// s3
+		Bucket         string `yaml:"bucket"`
+		Region         string `yaml:"region"`
+		AccessKey      string `yaml:"access_key"`
+		SecretKey      string `yaml:"secret_key"`
+		Endpoint       string `yaml:"endpoint"`
+		Prefix         string `yaml:"prefix"`
+		ForcePathStyle bool   `yaml:"force_path_style"`
 	}
 	Notifiers struct {
 		Mail struct {
@@ -186,6 +194,17 @@ func LoadYml(file string) (application.AppConfig, error) {
 				Folder:           drive.Folder,
 				ClientSecretFile: drive.ClientSecretFile,
 				TokenFile:        drive.TokenFile,
+			})
+		case "s3":
+			c.Drives = append(c.Drives, application.S3DriveConfig{
+				Label:          drive.Label,
+				Bucket:         drive.Bucket,
+				Region:         drive.Region,
+				AccessKey:      drive.AccessKey,
+				SecretKey:      drive.SecretKey,
+				Endpoint:       drive.Endpoint,
+				Prefix:         drive.Prefix,
+				ForcePathStyle: drive.ForcePathStyle,
 			})
 		default:
 			return c, fmt.Errorf("unsupported drive provider: %s", drive.Provider)

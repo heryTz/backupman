@@ -18,7 +18,7 @@ Backupman is a **minimalist backup system** that handles the essentials:
 ## Key Features
 
 - **Multi-Database Support**: MySQL, PostgreSQL, SQLite
-- **Hybrid Storage**: Local, Google Drive, S3 (soon)
+- **Hybrid Storage**: Local, Google Drive, S3
 - **Smart Retention**: Time-based auto-cleanup
 - **Scheduled Backups**: Cron-like scheduling
 - **Real-time Monitoring**: Email, Webhook notifications

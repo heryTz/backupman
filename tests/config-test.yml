@@ -1,0 +1,39 @@
+database:
+  provider: sqlite
+  db_path: ./tests/data/test.db
+
+data_sources:
+  - provider: sqlite
+    label: Test SQLite DB
+    db_path: ./tests/data/test.db
+    tmp_folder: ./tmp/sqlite
+
+drives:
+  - provider: s3
+    label: MinIO Test Drive
+    bucket: test-backups
+    region: us-east-1
+    access_key: minioadmin
+    secret_key: minioadmin123
+    endpoint: http://localhost:9000
+    prefix: backups
+    force_path_style: true
+
+notifiers:
+  mail:
+    enabled: false
+  webhook:
+    enabled: false
+
+retention:
+  enabled: true
+  by: age
+  value: 30
+
+http:
+  app_url: http://localhost:8080
+  api_keys:
+    - test-api-key
+  backup_job:
+    enabled: false
+    cron: "0 0 * * *"

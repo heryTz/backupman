@@ -57,6 +57,15 @@ drives:
     folder: demo
     client_secret_file: ./google-client-secret.json
     token_file: ./google-token.json
+  - provider: s3
+    label: S3 Drive
+    bucket: my-backup-bucket
+    region: us-east-1
+    access_key: YOUR_ACCESS_KEY
+    secret_key: YOUR_SECRET_KEY
+    endpoint: ""  # Optional: for S3-compatible services like MinIO
+    prefix: backups  # Optional: folder prefix in bucket
+    force_path_style: false  # Set to true for MinIO or other S3-compatible services
 
 notifiers:
   mail:

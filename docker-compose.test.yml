@@ -1,0 +1,44 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: backupman-minio-test
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  sqlite-test:
+    image: alpine:latest
+    container_name: backupman-sqlite-test
+    volumes:
+      - sqlite_data:/data
+      - ./tests:/app/tests
+    command: |
+      sh -c "
+        apk add --no-cache sqlite
+        mkdir -p /app/tests/data
+        sqlite3 /app/tests/data/test.db 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT);
+        INSERT INTO users (name, email) VALUES (\"Test User\", \"test@example.com\");
+        INSERT INTO users (name, email) VALUES (\"Another User\", \"another@example.com\");'
+        echo 'SQLite test database created'
+        tail -f /dev/null
+      "
+
+volumes:
+  minio_data:
+  sqlite_data:
+
+networks:
+  default:
+    name: backupman-test-network

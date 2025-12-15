@@ -63,6 +63,8 @@ func NewApp(config AppConfig) *App {
 			drives[i] = drive.NewLocalDrive(config.Label, config.Folder)
 		case GoogleDriveConfig:
 			drives[i] = drive.NewGoogleDrive(config.Label, config.Folder, config.ClientSecretFile, config.TokenFile)
+		case S3DriveConfig:
+			drives[i] = drive.NewS3Drive(config.Label, config.Bucket, config.Region, config.AccessKey, config.SecretKey, config.Endpoint, config.Prefix, config.ForcePathStyle)
 		default:
 			log.Fatal("Unsupported drive type")
 		}
